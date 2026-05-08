@@ -40,6 +40,7 @@ function FormField({
 }
 
 function RegisterPage() {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -57,6 +58,7 @@ function RegisterPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    navigate({ to: "/console" });
   };
 
   return (
