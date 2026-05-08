@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AuthLayout } from "../components/AuthLayout";
 import { useState } from "react";
 
@@ -40,6 +40,7 @@ function FormField({
 }
 
 function RegisterPage() {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -57,6 +58,7 @@ function RegisterPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    navigate({ to: "/console" });
   };
 
   return (
