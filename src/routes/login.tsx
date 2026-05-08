@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { AuthLayout } from "../components/AuthLayout";
 import { useState } from "react";
 
@@ -17,8 +17,11 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
+  const isValid = email.trim().length > 0 && password.trim().length > 0;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isValid) return;
     navigate({ to: "/console" });
   };
 
@@ -40,27 +43,33 @@ function LoginPage() {
             placeholder="请输入注册时使用的邮箱"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="rounded-lg border border-border bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+            className="form-input"
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-muted-foreground">密码</label>
+          <div className="flex items-center justify-between">
+            <label className="text-sm text-muted-foreground">密码</label>
+            <Link
+              to="/forgot-password"
+              className="text-xs text-primary hover:underline transition-colors"
+            >
+              忘记密码？
+            </Link>
+          </div>
           <input
             type="password"
             placeholder="请输入登录密码"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="rounded-lg border border-border bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+            className="form-input"
           />
         </div>
 
         <button
           type="submit"
-          className="mt-2 w-full rounded-full py-3.5 text-sm font-semibold text-primary-foreground transition-all hover:opacity-90"
-          style={{
-            background: "linear-gradient(135deg, oklch(0.62 0.13 45), oklch(0.55 0.11 40))",
-          }}
+          disabled={!isValid}
+          className="btn-primary mt-2 w-full py-3.5"
         >
           登录并进入控制台
         </button>
