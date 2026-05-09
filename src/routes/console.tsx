@@ -340,19 +340,23 @@ function ConsolePage() {
 
       {/* ── Prepay QR-code dialog ── */}
       <Dialog open={payMethod !== null} onOpenChange={(o) => !o && setPayMethod(null)}>
-        <DialogContent className="max-w-xs rounded-2xl border-border bg-card p-6">
+        <DialogContent
+          className="rounded-2xl border-border bg-card p-5 sm:max-w-[320px]"
+          style={{ width: "calc(100vw - 2rem)", maxWidth: "320px" }}
+        >
           <DialogHeader>
             <DialogTitle className="text-base font-bold">
               {payMethod === "wechat" ? "微信扫码预存积分" : "支付宝扫码预存积分"}
             </DialogTitle>
           </DialogHeader>
-          <div className="mt-2 flex flex-col items-center gap-3">
+          <div className="mt-1 flex flex-col items-center gap-3">
             <div
-              className={`flex h-48 w-48 items-center justify-center rounded-lg border-2 ${
+              className={`flex items-center justify-center rounded-lg border-2 bg-white ${
                 payMethod === "wechat" ? "border-[#07C160]/40" : "border-[#1677FF]/40"
-              } bg-white`}
+              }`}
+              style={{ width: 180, height: 180 }}
             >
-              <svg viewBox="0 0 100 100" className="h-44 w-44" aria-label="支付二维码">
+              <svg viewBox="0 0 100 100" width="160" height="160" aria-label="支付二维码">
                 <rect width="100" height="100" fill="#fff" />
                 {Array.from({ length: 100 }).map((_, i) => {
                   const x = (i % 10) * 10;
