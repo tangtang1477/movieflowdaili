@@ -75,6 +75,7 @@ function ConsolePage() {
   const [showGenerateDialog, setShowGenerateDialog] = useState(false);
   const [showWithdrawDialog, setShowWithdrawDialog] = useState(false);
   const [showContactDialog, setShowContactDialog] = useState(false);
+  const [payMethod, setPayMethod] = useState<null | "wechat" | "alipay">(null);
   const [inviteCodes, setInviteCodes] = useState<InviteCode[]>([]);
   const [copySuccess, setCopySuccess] = useState<string | null>(null);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
