@@ -83,7 +83,7 @@ function RegisterPage() {
     e.preventDefault();
     setSubmitted(true);
     if (!isValid) return;
-    navigate({ to: "/console" });
+    navigate({ to: "/verify-email", search: { email: form.email } });
   };
 
   return (
