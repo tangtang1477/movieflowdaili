@@ -7,6 +7,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend,
 } from "recharts";
@@ -15,7 +22,7 @@ export const Route = createFileRoute("/console")({
   head: () => ({
     meta: [
       { title: "代理商控制台 — Agent Console" },
-      { name: "description", content: "管理邀请码、查看返佣与客户数据。" },
+      { name: "description", content: "查看返佣收益、邀请数据并申请提现。" },
     ],
   }),
   component: ConsolePage,
@@ -31,7 +38,7 @@ interface InviteCode {
   status: "active" | "expired" | "used";
 }
 
-type Section = "overview" | "invite" | "stats" | "settings";
+type Section = "overview" | "invite" | "stats" | "info";
 
 /* ── Helpers ── */
 function generateRandomCode(prefix: string) {
@@ -45,34 +52,32 @@ const SIDEBAR_ITEMS: { key: Section; label: string; icon: string }[] = [
   { key: "overview", label: "账户总览", icon: "📊" },
   { key: "invite", label: "邀请码管理", icon: "🎫" },
   { key: "stats", label: "使用统计", icon: "📈" },
-  { key: "settings", label: "账户设置", icon: "⚙️" },
+  { key: "info", label: "账户信息", icon: "👤" },
 ];
 
 const PIE_COLORS = ["#3b82f6", "#f59e0b", "#10b981", "#8b5cf6", "#ef4444"];
 
-/* ── Demo data for charts ── */
+/* ── Demo data ── */
 const TREND_DATA = [
-  { month: "2024-12", 注册人数: 0, 使用积分: 0 },
-  { month: "2025-01", 注册人数: 0, 使用积分: 0 },
-  { month: "2025-02", 注册人数: 0, 使用积分: 0 },
-  { month: "2025-03", 注册人数: 0, 使用积分: 0 },
-  { month: "2025-04", 注册人数: 0, 使用积分: 0 },
-  { month: "2025-05", 注册人数: 0, 使用积分: 0 },
+  { month: "2024-12", 佣金收益: 0, 充值人数: 0 },
+  { month: "2025-01", 佣金收益: 0, 充值人数: 0 },
+  { month: "2025-02", 佣金收益: 0, 充值人数: 0 },
+  { month: "2025-03", 佣金收益: 0, 充值人数: 0 },
+  { month: "2025-04", 佣金收益: 0, 充值人数: 0 },
+  { month: "2025-05", 佣金收益: 0, 充值人数: 0 },
 ];
 
 /* ================================================================ */
 function ConsolePage() {
   const navigate = useNavigate();
   const [section, setSection] = useState<Section>("overview");
-  const [showCommissionDialog, setShowCommissionDialog] = useState(false);
+  const [showWelcomeDialog, setShowWelcomeDialog] = useState(false);
   const [showGenerateDialog, setShowGenerateDialog] = useState(false);
+  const [showWithdrawDialog, setShowWithdrawDialog] = useState(false);
+  const [showContactDialog, setShowContactDialog] = useState(false);
   const [inviteCodes, setInviteCodes] = useState<InviteCode[]>([]);
   const [copySuccess, setCopySuccess] = useState<string | null>(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-
-  // Quota alert
-  const [quotaAlertEnabled, setQuotaAlertEnabled] = useState(false);
-  const [quotaAlertThreshold, setQuotaAlertThreshold] = useState(100);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   // Generate form
   const [genQuantity, setGenQuantity] = useState(1);
@@ -87,16 +92,28 @@ function ConsolePage() {
   };
   const commissionNotSet = agent.commissionRate === "未设置";
 
+  // Welcome dialog (commission-oriented, shown once per session)
   useEffect(() => {
-    if (commissionNotSet) {
-      const t = setTimeout(() => setShowCommissionDialog(true), 500);
+    const key = "agent_console_welcome_shown";
+    if (typeof window !== "undefined" && !sessionStorage.getItem(key)) {
+      const t = setTimeout(() => {
+        setShowWelcomeDialog(true);
+        sessionStorage.setItem(key, "1");
+      }, 400);
       return () => clearTimeout(t);
     }
-  }, [commissionNotSet]);
+  }, []);
 
-  const totalQuota = inviteCodes.reduce((s, c) => s + c.credits * c.usageLimit, 0);
-  const usedQuota = inviteCodes.reduce((s, c) => s + c.credits * c.usedCount, 0);
-  const remainingQuota = totalQuota - usedQuota;
+  // Commission stats (demo: always 0 until real data wired up)
+  const commissionStats = useMemo(() => ({
+    available: 0,        // 当前可提现
+    pending: 0,          // 待结算
+    withdrawn: 0,        // 累计已提现
+    monthIncrement: 0,   // 本月新增
+    invitedUsers: 0,     // 邀请人数
+    rechargedUsers: 0,   // 已充值人数
+    totalRecharge: 0,    // 累计充值金额
+  }), []);
 
   const pendingCounts = useMemo(() => {
     const active = inviteCodes.filter(c => c.status === "active" && c.usedCount < c.usageLimit).length;
@@ -134,239 +151,317 @@ function ConsolePage() {
     setTimeout(() => setCopySuccess(null), 2000);
   };
 
+  const handleSelectSection = (s: Section) => {
+    setSection(s);
+    setMobileNavOpen(false);
+  };
+
+  const sectionTitle = SIDEBAR_ITEMS.find(i => i.key === section)?.label;
+
+  const NavList = ({ onPick }: { onPick: (s: Section) => void }) => (
+    <nav className="flex-1 space-y-1 px-2 py-4">
+      {SIDEBAR_ITEMS.map(item => (
+        <button
+          key={item.key}
+          onClick={() => onPick(item.key)}
+          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
+            section === item.key
+              ? "bg-primary/10 font-semibold text-primary"
+              : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+          }`}
+        >
+          <span className="text-base">{item.icon}</span>
+          <span>{item.label}</span>
+        </button>
+      ))}
+    </nav>
+  );
+
+  const onContact = () => setShowContactDialog(true);
+
   return (
     <div className="flex min-h-screen bg-background">
-      {/* ── Sidebar ── */}
-      <aside className={`sticky top-0 flex h-screen flex-col border-r border-border bg-card transition-all duration-200 ${sidebarCollapsed ? "w-16" : "w-56"}`}>
-        {/* Logo */}
+      {/* ── Desktop Sidebar ── */}
+      <aside className="sticky top-0 hidden h-screen w-56 flex-col border-r border-border bg-card md:flex">
         <div className="flex h-14 items-center gap-2.5 border-b border-border px-4">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-xs font-bold text-primary-foreground">A</div>
-          {!sidebarCollapsed && <span className="text-sm font-semibold text-foreground">Agent Console</span>}
+          <span className="text-sm font-semibold text-foreground">Agent Console</span>
         </div>
-
-        {/* Nav */}
-        <nav className="flex-1 space-y-1 px-2 py-4">
-          {SIDEBAR_ITEMS.map(item => (
-            <button
-              key={item.key}
-              onClick={() => setSection(item.key)}
-              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
-                section === item.key
-                  ? "bg-primary/10 font-semibold text-primary"
-                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-              }`}
-            >
-              <span className="text-base">{item.icon}</span>
-              {!sidebarCollapsed && <span>{item.label}</span>}
-            </button>
-          ))}
-        </nav>
-
-        {/* Collapse toggle */}
-        <div className="border-t border-border p-2">
-          <button onClick={() => setSidebarCollapsed(!sidebarCollapsed)} className="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs text-muted-foreground hover:bg-muted/50">
-            {sidebarCollapsed ? "»" : "« 收起"}
-          </button>
-        </div>
+        <NavList onPick={handleSelectSection} />
       </aside>
 
       {/* ── Main ── */}
-      <div className="flex flex-1 flex-col">
+      <div className="flex flex-1 flex-col min-w-0">
         {/* Top bar */}
-        <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b border-border bg-card/80 px-6 backdrop-blur-md">
-          <h1 className="text-base font-semibold text-foreground">
-            {SIDEBAR_ITEMS.find(i => i.key === section)?.label}
-          </h1>
-          <div className="flex items-center gap-4">
+        <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b border-border bg-card/80 px-4 backdrop-blur-md md:px-6">
+          <div className="flex items-center gap-2">
+            {/* Mobile nav trigger */}
+            <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
+              <SheetTrigger asChild>
+                <button
+                  className="btn-outline flex h-9 w-9 items-center justify-center p-0 md:hidden"
+                  aria-label="打开导航"
+                >
+                  ☰
+                </button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-64 p-0">
+                <SheetHeader className="border-b border-border px-4 py-3">
+                  <SheetTitle className="text-sm">Agent Console</SheetTitle>
+                </SheetHeader>
+                <NavList onPick={handleSelectSection} />
+              </SheetContent>
+            </Sheet>
+            <h1 className="text-base font-semibold text-foreground">{sectionTitle}</h1>
+          </div>
+          <div className="flex items-center gap-2 md:gap-4">
             <div className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-xs font-semibold">{user.name.charAt(0)}</div>
-              <span className="text-sm text-foreground">{user.name}</span>
+              <span className="hidden text-sm text-foreground sm:inline">{user.name}</span>
             </div>
-            <button onClick={() => navigate({ to: "/login" })} className="btn-outline px-4 py-1.5 text-xs">退出登录</button>
+            <button onClick={() => navigate({ to: "/login" })} className="btn-outline px-3 py-1.5 text-xs">退出</button>
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto px-6 py-6">
-          <div className="mx-auto max-w-[960px]">
+        <main className="flex-1 overflow-y-auto px-4 py-5 md:px-6 md:py-6">
+          <div className="mx-auto w-full max-w-[960px]">
             {section === "overview" && <OverviewSection
-              user={user} agent={agent} commissionNotSet={commissionNotSet}
-              totalQuota={totalQuota} usedQuota={usedQuota} remainingQuota={remainingQuota}
+              user={user}
+              commissionStats={commissionStats}
               pendingCounts={pendingCounts}
-              quotaAlertEnabled={quotaAlertEnabled} setQuotaAlertEnabled={setQuotaAlertEnabled}
-              quotaAlertThreshold={quotaAlertThreshold} setQuotaAlertThreshold={setQuotaAlertThreshold}
               onGenerateClick={() => setShowGenerateDialog(true)}
-              onSectionChange={setSection}
+              onWithdraw={() => setShowWithdrawDialog(true)}
+              onSectionChange={handleSelectSection}
+              onContact={onContact}
+              commissionNotSet={commissionNotSet}
+              agent={agent}
             />}
             {section === "invite" && <InviteSection
               inviteCodes={inviteCodes} copySuccess={copySuccess}
               onCopyLink={handleCopyLink} onGenerateClick={() => setShowGenerateDialog(true)}
             />}
-            {section === "stats" && <StatsSection trendData={TREND_DATA} distributionData={distributionData} inviteCodes={inviteCodes} />}
-            {section === "settings" && <SettingsSection user={user} agent={agent} commissionNotSet={commissionNotSet} />}
+            {section === "stats" && <StatsSection
+              trendData={TREND_DATA} distributionData={distributionData}
+              inviteCodes={inviteCodes} commissionStats={commissionStats}
+            />}
+            {section === "info" && <InfoSection
+              user={user} agent={agent} commissionNotSet={commissionNotSet}
+              onContact={onContact}
+            />}
           </div>
         </main>
       </div>
 
-      {/* ── Dialogs ── */}
-      <Dialog open={showCommissionDialog} onOpenChange={setShowCommissionDialog}>
-        <DialogContent className="max-w-md rounded-2xl border-border bg-card p-8">
-          <DialogHeader><DialogTitle className="text-xl font-bold">开始使用前</DialogTitle></DialogHeader>
-          <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-relaxed">
-            您的返佣比例尚未设置。您可以先生成 <strong>0 预存额度</strong> 的邀请码体验功能，如需提升额度请联系我们。
+      {/* ── Welcome dialog (commission-oriented) ── */}
+      <Dialog open={showWelcomeDialog} onOpenChange={setShowWelcomeDialog}>
+        <DialogContent className="max-w-md rounded-2xl border-border bg-card p-7">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold leading-snug">
+              欢迎加入，最高可赚 <span className="text-primary">50%</span> 佣金 🎉
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-2 space-y-3 text-sm leading-relaxed text-muted-foreground">
+            <p>
+              您每邀请一位用户充值，最高可获得 <strong className="text-foreground">50% 的佣金奖励</strong>。
+            </p>
+            <p>
+              零成本起步，立即生成您的专属邀请码，分享给好友即可开始赚取第一笔收益。
+            </p>
+            <ul className="rounded-lg border border-border bg-muted/30 p-3 text-xs space-y-1.5">
+              <li>✅ 注册即可使用，无需任何前置费用</li>
+              <li>✅ 客户充值即结算，结算后随时申请提现</li>
+              <li>✅ 邀请越多，佣金比例越高</li>
+            </ul>
           </div>
-          <div className="mt-6 flex items-center justify-center gap-3">
-            <button className="btn-outline px-6 py-2.5">联系我们</button>
-            <button onClick={() => { setShowCommissionDialog(false); setShowGenerateDialog(true); }} className="btn-primary px-6 py-2.5">生成 0 预存邀请码</button>
+          <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">
+            <button
+              onClick={() => setShowWelcomeDialog(false)}
+              className="btn-outline w-full px-6 py-2.5 sm:w-auto"
+            >
+              先看看控制台
+            </button>
+            <button
+              onClick={() => { setShowWelcomeDialog(false); setShowGenerateDialog(true); }}
+              className="btn-primary w-full px-6 py-2.5 sm:w-auto"
+            >
+              立即生成邀请码
+            </button>
           </div>
         </DialogContent>
       </Dialog>
 
+      {/* ── Generate invite-code dialog ── */}
       <Dialog open={showGenerateDialog} onOpenChange={setShowGenerateDialog}>
-        <DialogContent className="max-w-md rounded-2xl border-border bg-card p-8">
+        <DialogContent className="max-w-md rounded-2xl border-border bg-card p-7">
           <DialogHeader><DialogTitle className="text-xl font-bold">生成邀请码</DialogTitle></DialogHeader>
-          <div className="mt-4 flex flex-col gap-5">
+          <div className="mt-3 flex flex-col gap-5">
             <NumberField label="生成数量" value={genQuantity} onChange={setGenQuantity} min={1} max={100} />
             <NumberField label="邀请码可用次数" value={genUsageLimit} onChange={setGenUsageLimit} min={1} max={999} />
             <NumberField label="注册预存积分" value={genCredits} onChange={setGenCredits} min={0} max={99999} />
-            <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
-                <p className="text-xs text-muted-foreground">本次预留额度</p>
-                <p className="mt-1 text-xl font-bold">{genCredits * genUsageLimit * genQuantity}</p>
-              </div>
-              <div className="rounded-lg border border-green-200 bg-green-50 p-4">
-                <p className="text-xs text-muted-foreground">当前剩余额度</p>
-                <p className="mt-1 text-xl font-bold">{remainingQuota}</p>
-              </div>
+            <div className="rounded-lg border border-border bg-muted/30 p-3 text-xs text-muted-foreground">
+              💡 客户使用邀请码注册并充值后，您将根据返佣比例获得对应佣金。
             </div>
-            <div className="flex items-center justify-center gap-3">
+            <div className="flex flex-col-reverse items-stretch gap-2 sm:flex-row sm:justify-center">
               <button onClick={() => setShowGenerateDialog(false)} className="btn-outline px-6 py-2.5">取消</button>
               <button onClick={handleGenerate} disabled={genQuantity < 1} className="btn-primary px-6 py-2.5">确认生成</button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* ── Withdraw dialog (gates the only "Contact us" prompt) ── */}
+      <Dialog open={showWithdrawDialog} onOpenChange={setShowWithdrawDialog}>
+        <DialogContent className="max-w-md rounded-2xl border-border bg-card p-7">
+          <DialogHeader><DialogTitle className="text-xl font-bold">申请提现</DialogTitle></DialogHeader>
+          <div className="mt-2 space-y-3 text-sm leading-relaxed">
+            <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+              <p className="text-xs text-green-700">当前可提现金额</p>
+              <p className="mt-1 text-3xl font-bold text-green-700">¥ {commissionStats.available.toFixed(2)}</p>
+            </div>
+            <p className="text-muted-foreground">
+              提现需联系我们的合作经理审核，确认无误后预计 <strong className="text-foreground">1–3 个工作日</strong>到账。
+            </p>
+          </div>
+          <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-center">
+            <button onClick={() => setShowWithdrawDialog(false)} className="btn-outline px-6 py-2.5">取消</button>
+            <button onClick={() => { setShowWithdrawDialog(false); setShowContactDialog(true); }} className="btn-primary px-6 py-2.5">联系合作经理</button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Contact us dialog ── */}
+      <Dialog open={showContactDialog} onOpenChange={setShowContactDialog}>
+        <DialogContent className="max-w-sm rounded-2xl border-border bg-card p-7">
+          <DialogHeader><DialogTitle className="text-xl font-bold">联系我们</DialogTitle></DialogHeader>
+          <div className="mt-2 space-y-3 text-sm">
+            <p className="text-muted-foreground">通过以下方式联系合作经理：</p>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 px-3 py-2.5">
+                <span className="text-xs text-muted-foreground">微信号</span>
+                <span className="font-mono text-sm font-medium">movieflow_agent</span>
+              </div>
+              <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 px-3 py-2.5">
+                <span className="text-xs text-muted-foreground">邮箱</span>
+                <span className="font-mono text-sm font-medium">agent@movieflow.ai</span>
+              </div>
+              <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 px-3 py-2.5">
+                <span className="text-xs text-muted-foreground">客服电话</span>
+                <span className="font-mono text-sm font-medium">400-000-0000</span>
+              </div>
+            </div>
+          </div>
+          <div className="mt-5 flex justify-center">
+            <button onClick={() => setShowContactDialog(false)} className="btn-primary px-8 py-2.5">我知道了</button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
 
 /* ================================================================
-   SECTION: 账户总览
+   SECTION: 账户总览（佣金导向）
    ================================================================ */
 function OverviewSection({
-  user, agent, commissionNotSet,
-  totalQuota, usedQuota, remainingQuota,
-  pendingCounts,
-  quotaAlertEnabled, setQuotaAlertEnabled,
-  quotaAlertThreshold, setQuotaAlertThreshold,
-  onGenerateClick, onSectionChange,
+  user, commissionStats, pendingCounts,
+  onGenerateClick, onWithdraw, onSectionChange, onContact,
+  commissionNotSet, agent,
 }: {
-  user: any; agent: any; commissionNotSet: boolean;
-  totalQuota: number; usedQuota: number; remainingQuota: number;
+  user: any;
+  commissionStats: { available: number; pending: number; withdrawn: number; monthIncrement: number; invitedUsers: number; rechargedUsers: number; totalRecharge: number };
   pendingCounts: { active: number; expired: number; fullyUsed: number };
-  quotaAlertEnabled: boolean; setQuotaAlertEnabled: (v: boolean) => void;
-  quotaAlertThreshold: number; setQuotaAlertThreshold: (v: number) => void;
-  onGenerateClick: () => void; onSectionChange: (s: Section) => void;
+  onGenerateClick: () => void;
+  onWithdraw: () => void;
+  onSectionChange: (s: Section) => void;
+  onContact: () => void;
+  commissionNotSet: boolean;
+  agent: any;
 }) {
   return (
     <div className="space-y-6">
       {/* Welcome */}
       <div>
         <h2 className="text-2xl font-bold">你好，{user.name} 👋</h2>
-        <p className="mt-1 text-sm text-muted-foreground">欢迎回到代理商控制台</p>
-        <div className="mt-2 flex items-center gap-3">
+        <p className="mt-1 text-sm text-muted-foreground">最高 50% 返佣，邀请越多赚得越多</p>
+        <div className="mt-2 flex flex-wrap items-center gap-2">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
             <span className="h-1.5 w-1.5 rounded-full bg-green-500" />账号正常
           </span>
-          <span className="text-xs text-muted-foreground">ID: {user.agentId}</span>
+          <span className="text-xs text-muted-foreground break-all">ID: {user.agentId}</span>
         </div>
       </div>
 
-      {/* Commission warning */}
-      {commissionNotSet && (
-        <div className="flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-100">⚠️</div>
-            <div>
-              <p className="text-sm font-medium text-amber-800">返佣比例尚未设置</p>
-              <p className="text-xs text-amber-600">目前只能生成 0 预存额度的邀请码，联系我们提升额度</p>
-            </div>
-          </div>
-          <button className="btn-outline border-amber-300 px-4 py-1.5 text-xs text-amber-700 hover:bg-amber-100">联系我们</button>
+      {/* Hero: cumulative commission earnings */}
+      <div className="rounded-2xl border border-border bg-gradient-to-br from-primary/10 via-card to-card p-6">
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">当前可提现佣金</p>
+        <div className="mt-2 flex flex-wrap items-end gap-3">
+          <p className="text-4xl font-bold text-foreground md:text-5xl">¥ {commissionStats.available.toFixed(2)}</p>
+          <span className="text-sm text-muted-foreground pb-1.5">本月新增 ¥{commissionStats.monthIncrement.toFixed(2)}</span>
         </div>
-      )}
-
-      {/* Quota card with formula */}
-      <div className="rounded-xl border border-border bg-card p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs font-medium text-muted-foreground">可用额度</p>
-            <p className="mt-1 text-3xl font-bold text-foreground">{remainingQuota}</p>
+        <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+          <div className="rounded-lg bg-muted/40 px-3 py-2">
+            <p className="text-xs text-muted-foreground">待结算</p>
+            <p className="mt-0.5 font-semibold text-foreground">¥ {commissionStats.pending.toFixed(2)}</p>
           </div>
-          <div className="flex gap-2">
-            <button onClick={onGenerateClick} className="btn-primary px-5 py-2">生成邀请码</button>
-            <button onClick={() => onSectionChange("invite")} className="btn-outline px-4 py-2 text-sm">邀请码管理</button>
+          <div className="rounded-lg bg-muted/40 px-3 py-2">
+            <p className="text-xs text-muted-foreground">累计已提现</p>
+            <p className="mt-0.5 font-semibold text-foreground">¥ {commissionStats.withdrawn.toFixed(2)}</p>
           </div>
         </div>
-        {/* Formula breakdown (inspired by Volcengine) */}
-        <p className="mt-3 text-xs text-muted-foreground">
-          ( 总额度: <span className="font-semibold text-foreground">{totalQuota}</span> − 已使用: <span className="font-semibold text-foreground">{usedQuota}</span> ) = 剩余额度: <span className="font-semibold text-foreground">{remainingQuota}</span>
-        </p>
-
-        {/* Quota alert toggle */}
-        <div className="mt-4 flex items-center gap-3 border-t border-border pt-4">
-          <p className="text-xs text-muted-foreground">可用额度预警</p>
-          <button
-            onClick={() => setQuotaAlertEnabled(!quotaAlertEnabled)}
-            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${quotaAlertEnabled ? "bg-primary" : "bg-muted"}`}
-          >
-            <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white transition-transform ${quotaAlertEnabled ? "translate-x-4" : "translate-x-0.5"}`} />
-          </button>
-          {quotaAlertEnabled && (
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">阈值:</span>
-              <input
-                type="number" min={0} value={quotaAlertThreshold}
-                onChange={e => setQuotaAlertThreshold(Number(e.target.value))}
-                className="form-input w-20 py-1 text-center text-xs"
-              />
-            </div>
-          )}
+        <div className="mt-5 flex flex-col gap-2 sm:flex-row">
+          <button onClick={onWithdraw} className="btn-primary px-6 py-2.5">💰 申请提现</button>
+          <button onClick={onGenerateClick} className="btn-outline px-6 py-2.5">+ 生成邀请码</button>
         </div>
       </div>
 
-      {/* 3-column quota cards */}
-      <div className="grid grid-cols-3 gap-4">
-        <QuotaCard label="总额度" value={totalQuota} icon="📊" color="blue" />
-        <QuotaCard label="已使用" value={usedQuota} icon="📤" color="orange" />
-        <QuotaCard label="剩余额度" value={remainingQuota} icon="💰" color="green" />
+      {/* Reward rule banner */}
+      <div className="rounded-xl border border-border bg-card p-4 text-sm">
+        <div className="flex items-start gap-3">
+          <span className="text-xl">🎁</span>
+          <div className="flex-1">
+            <p className="font-semibold text-foreground">奖励规则</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              每邀请 1 位用户充值，您可获得对应金额的佣金奖励。当前最高比例 <strong className="text-primary">50%</strong>，邀请越多档位越高。
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        {/* Pending tasks card (inspired by Volcengine 待办事项) */}
+      {/* 3-column commission cards */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <StatCard label="邀请人数" value={commissionStats.invitedUsers} suffix="人" icon="👥" color="blue" />
+        <StatCard label="充值人数" value={commissionStats.rechargedUsers} suffix="人" icon="💳" color="orange" />
+        <StatCard label="累计佣金" value={`¥${commissionStats.totalRecharge}`} icon="💰" color="green" />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {/* Pending tasks */}
         <div className="rounded-xl border border-border bg-card p-5">
-          <h3 className="mb-4 text-sm font-semibold text-foreground">待办事项</h3>
-          <div className="grid grid-cols-3 gap-4">
+          <h3 className="mb-4 text-sm font-semibold text-foreground">邀请码状态</h3>
+          <div className="grid grid-cols-3 gap-2">
             <PendingItem label="待使用" count={pendingCounts.active} color="text-blue-600" onClick={() => onSectionChange("invite")} />
             <PendingItem label="已过期" count={pendingCounts.expired} color="text-amber-600" onClick={() => onSectionChange("invite")} />
             <PendingItem label="已用完" count={pendingCounts.fullyUsed} color="text-green-600" onClick={() => onSectionChange("invite")} />
           </div>
         </div>
 
-        {/* Quick settings card (inspired by Volcengine 账户设置) */}
+        {/* Quick info */}
         <div className="rounded-xl border border-border bg-card p-5">
-          <h3 className="mb-4 text-sm font-semibold text-foreground">快捷设置</h3>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between text-sm">
+          <h3 className="mb-4 text-sm font-semibold text-foreground">合作信息</h3>
+          <div className="space-y-3 text-sm">
+            <div className="flex items-center justify-between">
               <span className="text-muted-foreground">返佣比例</span>
               {commissionNotSet
-                ? <span className="text-xs text-amber-600 font-medium">未设置</span>
+                ? <button onClick={onContact} className="btn-contact">联系我们</button>
                 : <span className="font-medium text-foreground">{agent.commissionRate}</span>}
             </div>
-            <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center justify-between">
               <span className="text-muted-foreground">结算日</span>
-              <span className={`text-xs font-medium ${agent.settlementDay === "未设置" ? "text-amber-600" : "text-foreground"}`}>{agent.settlementDay}</span>
+              {agent.settlementDay === "未设置"
+                ? <button onClick={onContact} className="btn-contact">联系我们</button>
+                : <span className="font-medium text-foreground">{agent.settlementDay}</span>}
             </div>
-            <button onClick={() => onSectionChange("settings")} className="btn-ghost w-full py-1.5 text-xs text-primary">查看全部设置 →</button>
+            <button onClick={() => onSectionChange("info")} className="btn-ghost w-full py-1.5 text-xs">查看账户信息 →</button>
           </div>
         </div>
       </div>
@@ -375,7 +470,7 @@ function OverviewSection({
 }
 
 /* ================================================================
-   SECTION: 邀请码管理
+   SECTION: 邀请码管理（响应式：桌面表格 / 移动卡片）
    ================================================================ */
 function InviteSection({
   inviteCodes, copySuccess, onCopyLink, onGenerateClick,
@@ -384,146 +479,227 @@ function InviteSection({
   onCopyLink: (code: string) => void; onGenerateClick: () => void;
 }) {
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-xl font-bold">邀请码管理</h2>
-          <p className="mt-1 text-sm text-muted-foreground">生成邀请码分享给客户，客户注册后自动关联到您的代理商账号</p>
+          <p className="mt-1 text-sm text-muted-foreground">分享邀请码给好友，他们注册后将自动绑定到您名下。</p>
         </div>
         <button onClick={onGenerateClick} className="btn-primary px-6 py-2.5">+ 生成邀请码</button>
       </div>
 
-      <div className="rounded-xl border border-border bg-card p-6">
-        {inviteCodes.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border text-left">
-                  <th className="pb-3 pr-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">邀请码</th>
-                  <th className="pb-3 pr-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">可用次数</th>
-                  <th className="pb-3 pr-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">已使用</th>
-                  <th className="pb-3 pr-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">预存积分</th>
-                  <th className="pb-3 pr-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">状态</th>
-                  <th className="pb-3 pr-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">创建时间</th>
-                  <th className="pb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">操作</th>
-                </tr>
-              </thead>
-              <tbody>
-                {inviteCodes.map(c => (
-                  <tr key={c.code} className="border-b border-border/50 transition-colors hover:bg-muted/30">
-                    <td className="py-3.5 pr-4 font-mono text-sm font-semibold">{c.code}</td>
-                    <td className="py-3.5 pr-4">{c.usageLimit}</td>
-                    <td className="py-3.5 pr-4">{c.usedCount}</td>
-                    <td className="py-3.5 pr-4">{c.credits}</td>
-                    <td className="py-3.5 pr-4">
-                      <StatusBadge status={c.status} />
-                    </td>
-                    <td className="py-3.5 pr-4 text-muted-foreground">{c.createdAt}</td>
-                    <td className="py-3.5">
-                      <div className="flex items-center gap-2">
-                        <button onClick={() => onCopyLink(c.code)} className="btn-ghost px-2 py-1 text-xs">
-                          {copySuccess === c.code ? "✓ 已复制" : "复制链接"}
-                        </button>
-                        <button className="btn-ghost px-2 py-1 text-xs">二维码</button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
+      {inviteCodes.length === 0 ? (
+        <div className="rounded-xl border border-border bg-card p-6">
           <div className="flex flex-col items-center py-12 text-center">
             <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted text-3xl">📋</div>
             <p className="text-sm font-medium">还没有邀请码</p>
-            <p className="mt-1 text-xs text-muted-foreground">点击上方「生成邀请码」按钮创建第一个邀请码</p>
+            <p className="mt-1 text-xs text-muted-foreground">点击上方「生成邀请码」按钮创建第一个吧</p>
           </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <>
+          {/* Desktop table */}
+          <div className="hidden rounded-xl border border-border bg-card p-6 md:block">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border text-left">
+                    <th className="pb-3 pr-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">邀请码</th>
+                    <th className="pb-3 pr-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">可用次数</th>
+                    <th className="pb-3 pr-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">已使用</th>
+                    <th className="pb-3 pr-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">预存积分</th>
+                    <th className="pb-3 pr-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">状态</th>
+                    <th className="pb-3 pr-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">创建时间</th>
+                    <th className="pb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {inviteCodes.map(c => (
+                    <tr key={c.code} className="border-b border-border/50 transition-colors hover:bg-muted/30">
+                      <td className="py-3.5 pr-4 font-mono text-sm font-semibold">{c.code}</td>
+                      <td className="py-3.5 pr-4">{c.usageLimit}</td>
+                      <td className="py-3.5 pr-4">{c.usedCount}</td>
+                      <td className="py-3.5 pr-4">{c.credits}</td>
+                      <td className="py-3.5 pr-4"><StatusBadge status={c.status} /></td>
+                      <td className="py-3.5 pr-4 text-muted-foreground">{c.createdAt}</td>
+                      <td className="py-3.5">
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => onCopyLink(c.code)} className="btn-ghost px-2 py-1 text-xs">
+                            {copySuccess === c.code ? "✓ 已复制" : "复制链接"}
+                          </button>
+                          <button className="btn-ghost px-2 py-1 text-xs">二维码</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Mobile card list */}
+          <div className="space-y-3 md:hidden">
+            {inviteCodes.map(c => (
+              <div key={c.code} className="rounded-xl border border-border bg-card p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-mono text-base font-semibold">{c.code}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{c.createdAt}</p>
+                  </div>
+                  <StatusBadge status={c.status} />
+                </div>
+                <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+                  <div className="rounded-lg bg-muted/40 py-2">
+                    <p className="text-[10px] text-muted-foreground">可用</p>
+                    <p className="text-sm font-semibold">{c.usageLimit}</p>
+                  </div>
+                  <div className="rounded-lg bg-muted/40 py-2">
+                    <p className="text-[10px] text-muted-foreground">已用</p>
+                    <p className="text-sm font-semibold">{c.usedCount}</p>
+                  </div>
+                  <div className="rounded-lg bg-muted/40 py-2">
+                    <p className="text-[10px] text-muted-foreground">积分</p>
+                    <p className="text-sm font-semibold">{c.credits}</p>
+                  </div>
+                </div>
+                <div className="mt-3 flex gap-2">
+                  <button onClick={() => onCopyLink(c.code)} className="btn-outline flex-1 py-2 text-xs">
+                    {copySuccess === c.code ? "✓ 已复制" : "复制链接"}
+                  </button>
+                  <button className="btn-outline flex-1 py-2 text-xs">二维码</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
 
 /* ================================================================
-   SECTION: 使用统计
+   SECTION: 使用统计（佣金导向 + 结算时间线）
    ================================================================ */
 function StatsSection({
-  trendData, distributionData, inviteCodes,
+  trendData, distributionData, inviteCodes, commissionStats,
 }: {
-  trendData: { month: string; 注册人数: number; 使用积分: number }[];
+  trendData: { month: string; 佣金收益: number; 充值人数: number }[];
   distributionData: { name: string; value: number }[];
   inviteCodes: InviteCode[];
+  commissionStats: { invitedUsers: number; rechargedUsers: number; totalRecharge: number; available: number; pending: number };
 }) {
-  // Recent 3-month billing-style table
-  const recentMonths = useMemo(() => {
+  // Settlement timeline rows (demo) — generate next 3 settlement dates (last day of each month)
+  const settlementRows = useMemo(() => {
     const now = new Date();
     return Array.from({ length: 3 }, (_, i) => {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-      const codesThisMonth = inviteCodes.filter(c => c.createdAt.includes(key));
-      const generated = codesThisMonth.length;
-      const used = codesThisMonth.reduce((s, c) => s + c.usedCount, 0);
-      const credits = codesThisMonth.reduce((s, c) => s + c.credits * c.usageLimit, 0);
-      return { month: key, generated, used, credits, status: i === 0 ? "统计中" : "已结算" };
+      const d = new Date(now.getFullYear(), now.getMonth() + i + 1, 0); // last day of month
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      const isPast = i === 0 && now.getDate() > 25;
+      return {
+        date: dateStr,
+        recharge: 0,
+        rate: "—",
+        commission: 0,
+        status: isPast ? "已结算 · 可提现" : "待结算",
+      };
     });
-  }, [inviteCodes]);
+  }, []);
+
+  const conversionRate = commissionStats.invitedUsers > 0
+    ? Math.round((commissionStats.rechargedUsers / commissionStats.invitedUsers) * 100)
+    : 0;
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-bold">使用统计</h2>
-
-      {/* Recent 3-month summary table (Volcengine style) */}
-      <div className="rounded-xl border border-border bg-card p-6">
-        <h3 className="mb-4 text-sm font-semibold">近三月概览</h3>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border text-left">
-              <th className="pb-3 pr-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">账期</th>
-              <th className="pb-3 pr-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">生成数量</th>
-              <th className="pb-3 pr-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">使用次数</th>
-              <th className="pb-3 pr-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">涉及积分</th>
-              <th className="pb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">状态</th>
-            </tr>
-          </thead>
-          <tbody>
-            {recentMonths.map(m => (
-              <tr key={m.month} className="border-b border-border/50">
-                <td className="py-3 pr-4 font-medium">{m.month}</td>
-                <td className="py-3 pr-4">{m.generated}</td>
-                <td className="py-3 pr-4">{m.used}</td>
-                <td className="py-3 pr-4">{m.credits}</td>
-                <td className="py-3">
-                  <span className={`inline-flex items-center gap-1 text-xs font-medium ${m.status === "统计中" ? "text-blue-600" : "text-green-600"}`}>
-                    <span className={`h-1.5 w-1.5 rounded-full ${m.status === "统计中" ? "bg-blue-500" : "bg-green-500"}`} />
-                    {m.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div>
+        <h2 className="text-xl font-bold">使用统计</h2>
+        <p className="mt-1 text-sm text-muted-foreground">查看邀请数据与可提现佣金时间线</p>
       </div>
 
-      {/* Charts row */}
-      <div className="grid grid-cols-2 gap-4">
-        {/* Trend chart */}
+      {/* 4 stat cards */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StatCard label="通过邀请码注册" value={commissionStats.invitedUsers} suffix="人" icon="👥" color="blue" />
+        <StatCard label="其中已充值" value={`${commissionStats.rechargedUsers} (${conversionRate}%)`} icon="💳" color="orange" />
+        <StatCard label="累计充值金额" value={`¥${commissionStats.totalRecharge}`} icon="💵" color="green" />
+        <StatCard label="预计可提现佣金" value={`¥${(commissionStats.available + commissionStats.pending).toFixed(2)}`} icon="💰" color="primary" />
+      </div>
+
+      {/* Settlement timeline (key new section) */}
+      <div className="rounded-xl border border-border bg-card p-5">
+        <div className="mb-3">
+          <h3 className="text-sm font-semibold">按结算日期展示可提现金额</h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            结算日为每月最后一天，结算后 T+3 个工作日可申请提现。
+          </p>
+        </div>
+        {/* Desktop */}
+        <div className="hidden overflow-x-auto md:block">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border text-left">
+                <th className="pb-3 pr-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">结算日期</th>
+                <th className="pb-3 pr-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">充值金额</th>
+                <th className="pb-3 pr-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">佣金比例</th>
+                <th className="pb-3 pr-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">可提现金额</th>
+                <th className="pb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">状态</th>
+              </tr>
+            </thead>
+            <tbody>
+              {settlementRows.map(r => (
+                <tr key={r.date} className="border-b border-border/50">
+                  <td className="py-3 pr-4 font-medium">{r.date}</td>
+                  <td className="py-3 pr-4">¥ {r.recharge.toFixed(2)}</td>
+                  <td className="py-3 pr-4">{r.rate}</td>
+                  <td className="py-3 pr-4 font-semibold text-foreground">¥ {r.commission.toFixed(2)}</td>
+                  <td className="py-3">
+                    <span className={`inline-flex items-center gap-1 text-xs font-medium ${r.status.includes("已结算") ? "text-green-600" : "text-amber-600"}`}>
+                      <span className={`h-1.5 w-1.5 rounded-full ${r.status.includes("已结算") ? "bg-green-500" : "bg-amber-500"}`} />
+                      {r.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {/* Mobile */}
+        <div className="space-y-2 md:hidden">
+          {settlementRows.map(r => (
+            <div key={r.date} className="rounded-lg border border-border bg-muted/20 p-3">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold">{r.date}</p>
+                <span className={`text-xs font-medium ${r.status.includes("已结算") ? "text-green-600" : "text-amber-600"}`}>
+                  {r.status}
+                </span>
+              </div>
+              <div className="mt-2 grid grid-cols-3 gap-2 text-xs">
+                <div><span className="text-muted-foreground">充值</span><p className="font-medium">¥{r.recharge}</p></div>
+                <div><span className="text-muted-foreground">比例</span><p className="font-medium">{r.rate}</p></div>
+                <div><span className="text-muted-foreground">可提现</span><p className="font-semibold text-foreground">¥{r.commission}</p></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Charts */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="rounded-xl border border-border bg-card p-5">
-          <h3 className="mb-4 text-sm font-semibold">近六月使用趋势</h3>
+          <h3 className="mb-4 text-sm font-semibold">近六月佣金收益</h3>
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={trendData} barSize={24}>
+              <BarChart data={trendData} barSize={20}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="month" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} />
                 <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12 }} />
-                <Bar dataKey="注册人数" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="使用积分" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="佣金收益" fill="#10b981" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="充值人数" fill="#3b82f6" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Distribution pie */}
         <div className="rounded-xl border border-border bg-card p-5">
           <h3 className="mb-4 text-sm font-semibold">邀请码状态分布</h3>
           <div className="h-56">
@@ -539,17 +715,25 @@ function StatsSection({
           </div>
         </div>
       </div>
+
+      {/* Latent var: keep inviteCodes referenced for future detail tabs */}
+      <input type="hidden" data-codes={inviteCodes.length} />
     </div>
   );
 }
 
 /* ================================================================
-   SECTION: 账户设置
+   SECTION: 账户信息（原"账户设置"）
    ================================================================ */
-function SettingsSection({ user, agent, commissionNotSet }: { user: any; agent: any; commissionNotSet: boolean }) {
+function InfoSection({ user, agent, commissionNotSet, onContact }: {
+  user: any; agent: any; commissionNotSet: boolean; onContact: () => void;
+}) {
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-bold">账户设置</h2>
+      <div>
+        <h2 className="text-xl font-bold">账户信息</h2>
+        <p className="mt-1 text-sm text-muted-foreground">查看您的账号与企业资料</p>
+      </div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div className="rounded-xl border border-border bg-card p-6">
@@ -566,8 +750,8 @@ function SettingsSection({ user, agent, commissionNotSet }: { user: any; agent: 
           <InfoRow label="联系人" value={agent.contact} />
           <InfoRow label="联系电话" value={agent.phone} />
           <InfoRow label="联系邮箱" value={agent.contactEmail} />
-          <InfoRow label="结算日" value={agent.settlementDay} warn={agent.settlementDay === "未设置"} />
-          <InfoRow label="返佣比例" value={agent.commissionRate} warn={commissionNotSet} />
+          <InfoRow label="结算日" value={agent.settlementDay} contactWhen="未设置" onContact={onContact} />
+          <InfoRow label="返佣比例" value={agent.commissionRate} contactWhen={commissionNotSet ? "未设置" : undefined} onContact={onContact} />
         </div>
       </div>
     </div>
@@ -590,30 +774,44 @@ function NumberField({ label, value, onChange, min, max }: { label: string; valu
   );
 }
 
-function InfoRow({ label, value, badge, warn }: { label: string; value: string; badge?: boolean; warn?: boolean }) {
+function InfoRow({ label, value, badge, contactWhen, onContact }: {
+  label: string; value: string; badge?: boolean;
+  contactWhen?: string; onContact?: () => void;
+}) {
+  const showContact = contactWhen !== undefined && (contactWhen === value || contactWhen === "未设置" && value === "未设置");
   return (
-    <div className="flex items-center justify-between border-b border-border/50 py-2.5 text-sm last:border-0">
-      <span className="text-muted-foreground">{label}</span>
+    <div className="flex items-center justify-between gap-3 border-b border-border/50 py-2.5 text-sm last:border-0">
+      <span className="text-muted-foreground shrink-0">{label}</span>
       {badge ? (
         <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700">{value}</span>
-      ) : warn ? (
-        <span className="font-medium text-amber-600">{value}</span>
+      ) : showContact ? (
+        <button onClick={onContact} className="btn-contact">联系我们</button>
       ) : (
-        <span className="font-medium text-foreground">{value}</span>
+        <span className="font-medium text-foreground text-right break-all">{value}</span>
       )}
     </div>
   );
 }
 
-function QuotaCard({ label, value, icon, color }: { label: string; value: number; icon: string; color: "blue" | "orange" | "green" }) {
-  const colorMap = { blue: "border-blue-200 bg-blue-50", orange: "border-amber-200 bg-amber-50", green: "border-green-200 bg-green-50" };
+function StatCard({ label, value, suffix, icon, color }: {
+  label: string; value: number | string; suffix?: string; icon: string;
+  color: "blue" | "orange" | "green" | "primary";
+}) {
+  const colorMap = {
+    blue: "border-blue-200 bg-blue-50",
+    orange: "border-amber-200 bg-amber-50",
+    green: "border-green-200 bg-green-50",
+    primary: "border-primary/30 bg-primary/5",
+  };
   return (
-    <div className={`rounded-xl border p-5 ${colorMap[color]}`}>
+    <div className={`rounded-xl border p-4 ${colorMap[color]}`}>
       <div className="flex items-center gap-2">
-        <span className="text-lg">{icon}</span>
+        <span className="text-base">{icon}</span>
         <p className="text-xs font-medium text-muted-foreground">{label}</p>
       </div>
-      <p className="mt-2 text-3xl font-bold text-foreground">{value}</p>
+      <p className="mt-2 text-2xl font-bold text-foreground md:text-3xl">
+        {value}{suffix && <span className="ml-1 text-sm font-medium text-muted-foreground">{suffix}</span>}
+      </p>
     </div>
   );
 }
