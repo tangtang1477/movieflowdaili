@@ -196,23 +196,7 @@ function ConsolePage() {
         {/* Top bar */}
         <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b border-border bg-card/80 px-4 backdrop-blur-md md:px-6">
           <div className="flex items-center gap-2">
-            {/* Mobile nav trigger */}
-            <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
-              <SheetTrigger asChild>
-                <button
-                  className="btn-outline flex h-9 w-9 items-center justify-center p-0 md:hidden"
-                  aria-label="打开导航"
-                >
-                  ☰
-                </button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-64 p-0">
-                <SheetHeader className="border-b border-border px-4 py-3">
-                  <SheetTitle className="text-sm">Agent Console</SheetTitle>
-                </SheetHeader>
-                <NavList onPick={handleSelectSection} />
-              </SheetContent>
-            </Sheet>
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-xs font-bold text-primary-foreground md:hidden">A</div>
             <h1 className="text-base font-semibold text-foreground">{sectionTitle}</h1>
           </div>
           <div className="flex items-center gap-2 md:gap-4">
