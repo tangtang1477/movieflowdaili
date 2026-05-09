@@ -119,12 +119,15 @@ function RegisterPage() {
           <FormField label="确认密码" placeholder="请再次输入登录密码" type="password" value={form.confirmPassword} onChange={update("confirmPassword")} required error={getError("confirmPassword")} />
         </div>
 
+        <p className="text-xs text-muted-foreground -mb-2">
+          点击下方按钮后，我们会向您填写的<strong className="text-foreground">登录邮箱</strong>发送一封验证邮件，验证完成即可进入控制台。
+        </p>
         <button
           type="submit"
           disabled={submitted && !isValid}
           className="btn-primary mt-2 w-full py-3.5"
         >
-          创建代理商账号
+          发送验证邮件并创建账号
         </button>
       </form>
     </AuthLayout>
