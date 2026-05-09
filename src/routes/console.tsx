@@ -338,6 +338,43 @@ function ConsolePage() {
         </DialogContent>
       </Dialog>
 
+      {/* ── Prepay QR-code dialog ── */}
+      <Dialog open={payMethod !== null} onOpenChange={(o) => !o && setPayMethod(null)}>
+        <DialogContent className="max-w-xs rounded-2xl border-border bg-card p-6">
+          <DialogHeader>
+            <DialogTitle className="text-base font-bold">
+              {payMethod === "wechat" ? "微信扫码预存积分" : "支付宝扫码预存积分"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-2 flex flex-col items-center gap-3">
+            <div
+              className={`flex h-48 w-48 items-center justify-center rounded-lg border-2 ${
+                payMethod === "wechat" ? "border-[#07C160]/40" : "border-[#1677FF]/40"
+              } bg-white`}
+            >
+              <svg viewBox="0 0 100 100" className="h-44 w-44" aria-label="支付二维码">
+                <rect width="100" height="100" fill="#fff" />
+                {Array.from({ length: 100 }).map((_, i) => {
+                  const x = (i % 10) * 10;
+                  const y = Math.floor(i / 10) * 10;
+                  const on = (i * 73 + 17) % 3 === 0;
+                  return on ? <rect key={i} x={x} y={y} width="10" height="10" fill="#111" /> : null;
+                })}
+                <rect x="0" y="0" width="30" height="30" fill="#fff" stroke="#111" strokeWidth="4" />
+                <rect x="10" y="10" width="10" height="10" fill="#111" />
+                <rect x="70" y="0" width="30" height="30" fill="#fff" stroke="#111" strokeWidth="4" />
+                <rect x="80" y="10" width="10" height="10" fill="#111" />
+                <rect x="0" y="70" width="30" height="30" fill="#fff" stroke="#111" strokeWidth="4" />
+                <rect x="10" y="80" width="10" height="10" fill="#111" />
+              </svg>
+            </div>
+            <p className="text-center text-xs text-muted-foreground">
+              请使用 {payMethod === "wechat" ? "微信" : "支付宝"} 扫一扫完成预存积分充值
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* ── Withdraw dialog (gates the only "Contact us" prompt) ── */}
       <Dialog open={showWithdrawDialog} onOpenChange={setShowWithdrawDialog}>
         <DialogContent className="max-w-md rounded-2xl border-border bg-card p-7">
