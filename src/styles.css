@@ -291,3 +291,26 @@
     min-height: 44px;
   }
 }
+
+/* Hide scrollbars on mobile while keeping scroll functional */
+@media (max-width: 768px) {
+  html, body {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+  .hide-scrollbar-mobile {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .hide-scrollbar-mobile::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+}

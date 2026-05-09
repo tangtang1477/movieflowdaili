@@ -7,13 +7,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend,
 } from "recharts";
@@ -78,7 +71,7 @@ function ConsolePage() {
   const [payMethod, setPayMethod] = useState<null | "wechat" | "alipay">(null);
   const [inviteCodes, setInviteCodes] = useState<InviteCode[]>([]);
   const [copySuccess, setCopySuccess] = useState<string | null>(null);
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  
 
   // Generate form
   const [genQuantity, setGenQuantity] = useState(1);
@@ -154,7 +147,7 @@ function ConsolePage() {
 
   const handleSelectSection = (s: Section) => {
     setSection(s);
-    setMobileNavOpen(false);
+    
   };
 
   const sectionTitle = SIDEBAR_ITEMS.find(i => i.key === section)?.label;
@@ -196,23 +189,7 @@ function ConsolePage() {
         {/* Top bar */}
         <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b border-border bg-card/80 px-4 backdrop-blur-md md:px-6">
           <div className="flex items-center gap-2">
-            {/* Mobile nav trigger */}
-            <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
-              <SheetTrigger asChild>
-                <button
-                  className="btn-outline flex h-9 w-9 items-center justify-center p-0 md:hidden"
-                  aria-label="打开导航"
-                >
-                  ☰
-                </button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-64 p-0">
-                <SheetHeader className="border-b border-border px-4 py-3">
-                  <SheetTitle className="text-sm">Agent Console</SheetTitle>
-                </SheetHeader>
-                <NavList onPick={handleSelectSection} />
-              </SheetContent>
-            </Sheet>
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-xs font-bold text-primary-foreground md:hidden">A</div>
             <h1 className="text-base font-semibold text-foreground">{sectionTitle}</h1>
           </div>
           <div className="flex items-center gap-2 md:gap-4">
@@ -224,7 +201,7 @@ function ConsolePage() {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto px-4 py-5 md:px-6 md:py-6">
+        <main className="flex-1 overflow-y-auto px-4 py-5 pb-24 md:px-6 md:py-6 md:pb-6 hide-scrollbar-mobile">
           <div className="mx-auto w-full max-w-[960px]">
             {section === "overview" && <OverviewSection
               user={user}
@@ -252,6 +229,29 @@ function ConsolePage() {
           </div>
         </main>
       </div>
+
+      {/* ── Mobile bottom tab bar ── */}
+      <nav
+        className="fixed bottom-0 left-0 right-0 z-30 grid grid-cols-4 border-t border-border bg-card/95 backdrop-blur-md md:hidden"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
+        {SIDEBAR_ITEMS.map(item => {
+          const active = section === item.key;
+          return (
+            <button
+              key={item.key}
+              onClick={() => handleSelectSection(item.key)}
+              className={`flex flex-col items-center justify-center gap-0.5 py-2 text-[11px] transition-colors ${
+                active ? "font-semibold text-primary" : "text-muted-foreground"
+              }`}
+              aria-label={item.label}
+            >
+              <span className="text-lg leading-none">{item.icon}</span>
+              <span>{item.label}</span>
+            </button>
+          );
+        })}
+      </nav>
 
       {/* ── Welcome dialog (commission-oriented) ── */}
       <Dialog open={showWelcomeDialog} onOpenChange={setShowWelcomeDialog}>
