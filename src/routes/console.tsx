@@ -208,7 +208,7 @@ function ConsolePage() {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto px-4 py-5 md:px-6 md:py-6">
+        <main className="flex-1 overflow-y-auto px-4 py-5 pb-24 md:px-6 md:py-6 md:pb-6 hide-scrollbar-mobile">
           <div className="mx-auto w-full max-w-[960px]">
             {section === "overview" && <OverviewSection
               user={user}
@@ -236,6 +236,29 @@ function ConsolePage() {
           </div>
         </main>
       </div>
+
+      {/* ── Mobile bottom tab bar ── */}
+      <nav
+        className="fixed bottom-0 left-0 right-0 z-30 grid grid-cols-4 border-t border-border bg-card/95 backdrop-blur-md md:hidden"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
+        {SIDEBAR_ITEMS.map(item => {
+          const active = section === item.key;
+          return (
+            <button
+              key={item.key}
+              onClick={() => handleSelectSection(item.key)}
+              className={`flex flex-col items-center justify-center gap-0.5 py-2 text-[11px] transition-colors ${
+                active ? "font-semibold text-primary" : "text-muted-foreground"
+              }`}
+              aria-label={item.label}
+            >
+              <span className="text-lg leading-none">{item.icon}</span>
+              <span>{item.label}</span>
+            </button>
+          );
+        })}
+      </nav>
 
       {/* ── Welcome dialog (commission-oriented) ── */}
       <Dialog open={showWelcomeDialog} onOpenChange={setShowWelcomeDialog}>
