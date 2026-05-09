@@ -71,7 +71,7 @@ function ConsolePage() {
   const [payMethod, setPayMethod] = useState<null | "wechat" | "alipay">(null);
   const [inviteCodes, setInviteCodes] = useState<InviteCode[]>([]);
   const [copySuccess, setCopySuccess] = useState<string | null>(null);
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  
 
   // Generate form
   const [genQuantity, setGenQuantity] = useState(1);
