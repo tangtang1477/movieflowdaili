@@ -300,7 +300,35 @@ function ConsolePage() {
             <NumberField label="邀请码可用次数" value={genUsageLimit} onChange={setGenUsageLimit} min={1} max={999} />
             <NumberField label="注册预存积分" value={genCredits} onChange={setGenCredits} min={0} max={99999} />
             <div className="rounded-lg border border-border bg-muted/30 p-3 text-xs text-muted-foreground">
-              💡 客户使用邀请码注册并充值后，您将根据返佣比例获得对应佣金。
+              <p>💡 客户使用邀请码注册并充值后，您将根据返佣比例获得对应佣金。</p>
+              <p className="mt-1.5 text-foreground/80">建议提前预存积分，邀请码额度更充足，推广不断档，收益上限同步提升。</p>
+            </div>
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-muted-foreground">预存积分</p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPayMethod("wechat")}
+                  className="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-md border border-[#07C160]/40 bg-white text-sm font-medium text-[#07C160] transition-colors hover:bg-[#07C160]/10 active:bg-[#07C160]/15"
+                  aria-label="微信支付预存积分"
+                >
+                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden>
+                    <path d="M9.5 3C5.36 3 2 5.91 2 9.5c0 2.06 1.13 3.89 2.88 5.09L4.2 17l2.5-1.36c.66.18 1.36.31 2.1.35-.13-.45-.2-.92-.2-1.4 0-3.31 3.13-6 7-6 .26 0 .51.01.76.04C16.73 5.07 13.46 3 9.5 3zM7 7.5a1 1 0 110 2 1 1 0 010-2zm5 0a1 1 0 110 2 1 1 0 010-2zm3.6 4c-3.31 0-6 2.24-6 5s2.69 5 6 5c.7 0 1.36-.1 1.98-.29L20 22l-.55-1.84c1.55-.92 2.55-2.43 2.55-4.16 0-2.76-2.69-5-6-5zm-2 2.5a.75.75 0 110 1.5.75.75 0 010-1.5zm4 0a.75.75 0 110 1.5.75.75 0 010-1.5z"/>
+                  </svg>
+                  微信
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPayMethod("alipay")}
+                  className="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-md border border-[#1677FF]/40 bg-white text-sm font-medium text-[#1677FF] transition-colors hover:bg-[#1677FF]/10 active:bg-[#1677FF]/15"
+                  aria-label="支付宝支付预存积分"
+                >
+                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden>
+                    <path d="M5 3h14a2 2 0 012 2v10.2c-2.1-.7-5.3-1.7-7.7-2.4.5-.9.9-1.9 1.2-3h-3.3v-1.2H15V8h-3.8V6h-1.5v1.6H6v1.2h3.7v1.2H6.6v1.2h6.2c-.2.7-.5 1.4-.8 2-1.7-.5-3.5-1-4.7-1-2 0-3.4 1-3.6 2.6-.3 1.9 1 3.6 3.6 3.6 1.9 0 3.7-.9 5.2-2.4 2.3 1.1 5.4 2.4 7.7 3.3A2 2 0 0119 21H5a2 2 0 01-2-2V5a2 2 0 012-2zm2.7 13.6c-1.4 0-2.3-.7-2.2-1.6.1-.8 1-1.3 2.3-1.3.9 0 2 .3 3.4.8-1 1.3-2.3 2.1-3.5 2.1z"/>
+                  </svg>
+                  支付宝
+                </button>
+              </div>
             </div>
             <div className="flex flex-col-reverse items-stretch gap-2 sm:flex-row sm:justify-center">
               <button onClick={() => setShowGenerateDialog(false)} className="btn-outline px-6 py-2.5">取消</button>
