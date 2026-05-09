@@ -147,7 +147,7 @@ function ConsolePage() {
 
   const handleSelectSection = (s: Section) => {
     setSection(s);
-    setMobileNavOpen(false);
+    
   };
 
   const sectionTitle = SIDEBAR_ITEMS.find(i => i.key === section)?.label;
