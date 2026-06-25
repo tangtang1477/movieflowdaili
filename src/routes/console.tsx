@@ -321,7 +321,7 @@ function ConsolePage() {
                 <button
                   type="button"
                   onClick={() => setPayMethod("wechat")}
-                  className="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-md border border-[#07C160]/40 bg-white text-sm font-medium text-[#07C160] transition-colors hover:bg-[#07C160]/10 active:bg-[#07C160]/15"
+                  className="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-md border border-[#07C160]/40 bg-card text-sm font-medium text-[#07C160] transition-colors hover:bg-[#07C160]/10 active:bg-[#07C160]/15"
                   aria-label="微信支付预存积分"
                 >
                   <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden>
@@ -332,7 +332,7 @@ function ConsolePage() {
                 <button
                   type="button"
                   onClick={() => setPayMethod("alipay")}
-                  className="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-md border border-[#1677FF]/40 bg-white text-sm font-medium text-[#1677FF] transition-colors hover:bg-[#1677FF]/10 active:bg-[#1677FF]/15"
+                  className="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-md border border-[#1677FF]/40 bg-card text-sm font-medium text-[#1677FF] transition-colors hover:bg-[#1677FF]/10 active:bg-[#1677FF]/15"
                   aria-label="支付宝支付预存积分"
                 >
                   <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden>
@@ -396,9 +396,9 @@ function ConsolePage() {
         <DialogContent className="max-w-md rounded-2xl border-border bg-card p-7">
           <DialogHeader><DialogTitle className="text-xl font-bold">申请提现</DialogTitle></DialogHeader>
           <div className="mt-2 space-y-3 text-sm leading-relaxed">
-            <div className="rounded-lg border border-green-200 bg-green-50 p-4">
-              <p className="text-xs text-green-700">当前可提现金额</p>
-              <p className="mt-1 text-3xl font-bold text-green-700">¥ {commissionStats.available.toFixed(2)}</p>
+            <div className="rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-500/30 dark:bg-green-500/10">
+              <p className="text-xs text-green-700 dark:text-green-300">当前可提现金额</p>
+              <p className="mt-1 text-3xl font-bold text-green-700 dark:text-green-300">¥ {commissionStats.available.toFixed(2)}</p>
             </div>
             <p className="text-muted-foreground">
               提现需联系我们的合作经理审核，确认无误后预计 <strong className="text-foreground">1–3 个工作日</strong>到账。
@@ -466,7 +466,7 @@ function OverviewSection({
         <h2 className="text-2xl font-bold">你好，{user.name} 👋</h2>
         <p className="mt-1 text-sm text-muted-foreground">最高 50% 返佣，邀请越多赚得越多</p>
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700 dark:bg-green-500/15 dark:text-green-300">
             <span className="h-1.5 w-1.5 rounded-full bg-green-500" />账号正常
           </span>
           <span className="text-xs text-muted-foreground break-all">ID: {user.agentId}</span>
@@ -521,9 +521,9 @@ function OverviewSection({
         <div className="rounded-xl border border-border bg-card p-5">
           <h3 className="mb-4 text-sm font-semibold text-foreground">邀请码状态</h3>
           <div className="grid grid-cols-3 gap-2">
-            <PendingItem label="待使用" count={pendingCounts.active} color="text-blue-600" onClick={() => onSectionChange("invite")} />
-            <PendingItem label="已过期" count={pendingCounts.expired} color="text-amber-600" onClick={() => onSectionChange("invite")} />
-            <PendingItem label="已用完" count={pendingCounts.fullyUsed} color="text-green-600" onClick={() => onSectionChange("invite")} />
+            <PendingItem label="待使用" count={pendingCounts.active} color="text-blue-600 dark:text-blue-400" onClick={() => onSectionChange("invite")} />
+            <PendingItem label="已过期" count={pendingCounts.expired} color="text-amber-600 dark:text-amber-400" onClick={() => onSectionChange("invite")} />
+            <PendingItem label="已用完" count={pendingCounts.fullyUsed} color="text-green-600 dark:text-green-400" onClick={() => onSectionChange("invite")} />
           </div>
         </div>
 
@@ -734,7 +734,7 @@ function StatsSection({
                   <td className="py-3 pr-4">{r.rate}</td>
                   <td className="py-3 pr-4 font-semibold text-foreground">¥ {r.commission.toFixed(2)}</td>
                   <td className="py-3">
-                    <span className={`inline-flex items-center gap-1 text-xs font-medium ${r.status.includes("已结算") ? "text-green-600" : "text-amber-600"}`}>
+                    <span className={`inline-flex items-center gap-1 text-xs font-medium ${r.status.includes("已结算") ? "text-green-600 dark:text-green-400" : "text-amber-600 dark:text-amber-400"}`}>
                       <span className={`h-1.5 w-1.5 rounded-full ${r.status.includes("已结算") ? "bg-green-500" : "bg-amber-500"}`} />
                       {r.status}
                     </span>
@@ -750,7 +750,7 @@ function StatsSection({
             <div key={r.date} className="rounded-lg border border-border bg-muted/20 p-3">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-semibold">{r.date}</p>
-                <span className={`text-xs font-medium ${r.status.includes("已结算") ? "text-green-600" : "text-amber-600"}`}>
+                <span className={`text-xs font-medium ${r.status.includes("已结算") ? "text-green-600 dark:text-green-400" : "text-amber-600 dark:text-amber-400"}`}>
                   {r.status}
                 </span>
               </div>
@@ -772,9 +772,9 @@ function StatsSection({
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={trendData} barSize={20}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} />
-                <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12 }} />
+                <XAxis dataKey="month" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} stroke="var(--border)" />
+                <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} stroke="var(--border)" />
+                <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12, background: "var(--popover)", border: "1px solid var(--border)", color: "var(--popover-foreground)" }} labelStyle={{ color: "var(--popover-foreground)" }} />
                 <Bar dataKey="佣金收益" fill="#10b981" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="充值人数" fill="#3b82f6" radius={[4, 4, 0, 0]} />
               </BarChart>
@@ -790,8 +790,8 @@ function StatsSection({
                 <Pie data={distributionData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" label={((props: any) => `${props.name ?? ""} ${((props.percent ?? 0) * 100).toFixed(0)}%`) as any}>
                   {distributionData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
                 </Pie>
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12 }} />
+                <Legend wrapperStyle={{ fontSize: 12, color: "var(--muted-foreground)" }} />
+                <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12, background: "var(--popover)", border: "1px solid var(--border)", color: "var(--popover-foreground)" }} labelStyle={{ color: "var(--popover-foreground)" }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -865,7 +865,7 @@ function InfoRow({ label, value, badge, contactWhen, onContact }: {
     <div className="flex items-center justify-between gap-3 border-b border-border/50 py-2.5 text-sm last:border-0">
       <span className="text-muted-foreground shrink-0">{label}</span>
       {badge ? (
-        <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700">{value}</span>
+        <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700 dark:bg-green-500/15 dark:text-green-300">{value}</span>
       ) : showContact ? (
         <button onClick={onContact} className="btn-contact">联系我们</button>
       ) : (
@@ -880,10 +880,10 @@ function StatCard({ label, value, suffix, icon, color }: {
   color: "blue" | "orange" | "green" | "primary";
 }) {
   const colorMap = {
-    blue: "border-blue-200 bg-blue-50",
-    orange: "border-amber-200 bg-amber-50",
-    green: "border-green-200 bg-green-50",
-    primary: "border-primary/30 bg-primary/5",
+    blue: "border-blue-200 bg-blue-50 dark:border-blue-500/30 dark:bg-blue-500/10",
+    orange: "border-amber-200 bg-amber-50 dark:border-amber-500/30 dark:bg-amber-500/10",
+    green: "border-green-200 bg-green-50 dark:border-green-500/30 dark:bg-green-500/10",
+    primary: "border-primary/30 bg-primary/5 dark:bg-primary/10",
   };
   return (
     <div className={`rounded-xl border p-4 ${colorMap[color]}`}>
@@ -900,9 +900,9 @@ function StatCard({ label, value, suffix, icon, color }: {
 
 function StatusBadge({ status }: { status: InviteCode["status"] }) {
   const map = {
-    active: { label: "使用中", cls: "bg-green-100 text-green-700" },
-    expired: { label: "已过期", cls: "bg-gray-100 text-gray-600" },
-    used: { label: "已用完", cls: "bg-blue-100 text-blue-700" },
+    active: { label: "使用中", cls: "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-300" },
+    expired: { label: "已过期", cls: "bg-muted text-muted-foreground" },
+    used: { label: "已用完", cls: "bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300" },
   };
   const s = map[status];
   return <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${s.cls}`}>{s.label}</span>;
