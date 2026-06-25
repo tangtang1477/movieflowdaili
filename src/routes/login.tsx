@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from "react";
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "代理商登录 — Agent Portal" },
+      { title: "分享开启收益计划 — Agent Portal" },
       { name: "description", content: "分享创造价值" },
     ],
   }),
