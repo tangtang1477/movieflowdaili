@@ -27,7 +27,10 @@ function ForgotPasswordPage() {
   return (
     <AuthLayout
       badge="Agent Portal"
-      tagline="重置密码，恢复对代理商控制台的访问。"
+      taglineMain="分享创造价值"
+      taglineSub="连接创作者与未来"
+      subtitle="邀请好友加入 MovieFlow Studio"
+      subtitleHint="注册即可获得收益"
       formTitle="忘记密码"
       formTag="Reset"
       switchText="想起密码了？"

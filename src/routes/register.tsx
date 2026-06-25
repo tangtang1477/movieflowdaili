@@ -89,7 +89,10 @@ function RegisterPage() {
   return (
     <AuthLayout
       badge="Agent Signup"
-      tagline="完善代理商基础信息，创建专属账号并进入合作控制台。"
+      taglineMain="分享创造价值"
+      taglineSub="连接创作者与未来"
+      subtitle="邀请好友加入 MovieFlow Studio"
+      subtitleHint="注册即可获得收益"
       formTitle="代理商注册"
       formTag="Register"
       switchText="已有账号？"

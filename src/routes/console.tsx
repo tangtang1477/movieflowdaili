@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { ThemeToggle } from "../components/ThemeToggle";
 import { useState, useEffect, useMemo } from "react";
 import {
   Dialog,
@@ -193,6 +194,7 @@ function ConsolePage() {
             <h1 className="text-base font-semibold text-foreground">{sectionTitle}</h1>
           </div>
           <div className="flex items-center gap-2 md:gap-4">
+            <ThemeToggle />
             <div className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-xs font-semibold">{user.name.charAt(0)}</div>
               <span className="hidden text-sm text-foreground sm:inline">{user.name}</span>
