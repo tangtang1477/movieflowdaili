@@ -321,7 +321,7 @@ function ConsolePage() {
                 <button
                   type="button"
                   onClick={() => setPayMethod("wechat")}
-                  className="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-md border border-[#07C160]/40 bg-white text-sm font-medium text-[#07C160] transition-colors hover:bg-[#07C160]/10 active:bg-[#07C160]/15"
+                  className="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-md border border-[#07C160]/40 bg-white text-sm font-medium text-[#07C160] transition-colors hover:bg-[#07C160]/10 active:bg-[#07C160]/15 dark:border-[#07C160]/50 dark:bg-[#07C160]/10 dark:text-[#3DDC84] dark:hover:bg-[#07C160]/20 dark:active:bg-[#07C160]/25"
                   aria-label="微信支付预存积分"
                 >
                   <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden>
