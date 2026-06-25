@@ -880,9 +880,9 @@ function StatCard({ label, value, suffix, icon, color }: {
   color: "blue" | "orange" | "green" | "primary";
 }) {
   const colorMap = {
-    blue: "border-blue-200 bg-blue-50",
-    orange: "border-amber-200 bg-amber-50",
-    green: "border-green-200 bg-green-50",
+    blue: "border-blue-500/20 bg-blue-500/5 dark:border-blue-400/20 dark:bg-blue-400/10",
+    orange: "border-amber-500/20 bg-amber-500/5 dark:border-amber-400/20 dark:bg-amber-400/10",
+    green: "border-emerald-500/20 bg-emerald-500/5 dark:border-emerald-400/20 dark:bg-emerald-400/10",
     primary: "border-primary/30 bg-primary/5",
   };
   return (
