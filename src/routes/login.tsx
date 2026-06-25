@@ -6,7 +6,7 @@ export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
       { title: "代理商登录 — Agent Portal" },
-      { name: "description", content: "登录代理商账号，查看邀请客户、返佣明细与结算进度。" },
+      { name: "description", content: "分享创造价值" },
     ],
   }),
   component: LoginPage,
@@ -54,7 +54,7 @@ function LoginPage() {
   return (
     <AuthLayout
       badge="Agent Portal"
-      tagline="登录代理商账号，查看邀请客户、返佣明细与结算进度。"
+      tagline="分享创造价值"
       formTitle="代理商登录"
       formTag="Login"
       switchText="没有账号？"
