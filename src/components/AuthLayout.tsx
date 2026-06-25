@@ -32,23 +32,20 @@ export function AuthLayout({
         {/* Left panel */}
         <div
           className="relative hidden w-[45%] flex-col justify-between overflow-hidden p-10 md:flex"
-          style={{
-            background:
-              "linear-gradient(165deg, oklch(0.22 0.028 285) 0%, oklch(0.14 0.022 285) 100%)",
-          }}
+          style={{ background: "var(--auth-panel-gradient)" }}
         >
-          {/* Decorative purple glow */}
+          {/* Decorative glow */}
           <div
             className="pointer-events-none absolute inset-0"
-            style={{
-              background:
-                "radial-gradient(ellipse at 80% 90%, oklch(0.55 0.18 290 / 0.22), transparent 60%)",
-            }}
+            style={{ background: "var(--auth-panel-glow)" }}
           />
 
           {/* Top — brand anchor */}
           <div className="relative z-10">
-            <p className="text-[11px] font-medium tracking-[0.3em] text-white/45 uppercase">
+            <p
+              className="text-[11px] font-medium tracking-[0.3em] uppercase"
+              style={{ color: "var(--auth-panel-brand)" }}
+            >
               MovieFlow Studio
             </p>
           </div>
@@ -56,19 +53,31 @@ export function AuthLayout({
           {/* Middle — unified content block */}
           <div className="relative z-10 flex flex-col gap-10">
             <div className="flex flex-col gap-2">
-              <h1 className="text-[34px] leading-[1.25] font-bold tracking-tight text-white">
+              <h1
+                className="text-[34px] leading-[1.25] font-bold tracking-tight"
+                style={{ color: "var(--auth-panel-text)" }}
+              >
                 {taglineMain}
               </h1>
-              <h2 className="text-[34px] leading-[1.25] font-bold tracking-tight text-white">
+              <h2
+                className="text-[34px] leading-[1.25] font-bold tracking-tight"
+                style={{ color: "var(--auth-panel-text)" }}
+              >
                 {taglineSub}
               </h2>
             </div>
 
             <div className="flex flex-col gap-2">
-              <p className="text-[14px] leading-relaxed text-white/70">
+              <p
+                className="text-[14px] leading-relaxed"
+                style={{ color: "var(--auth-panel-text-muted)" }}
+              >
                 {subtitle}
               </p>
-              <p className="text-[14px] leading-relaxed text-white/70">
+              <p
+                className="text-[14px] leading-relaxed"
+                style={{ color: "var(--auth-panel-text-muted)" }}
+              >
                 {subtitleHint}
               </p>
             </div>
