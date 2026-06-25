@@ -880,10 +880,10 @@ function StatCard({ label, value, suffix, icon, color }: {
   color: "blue" | "orange" | "green" | "primary";
 }) {
   const colorMap = {
-    blue: "border-blue-200 bg-blue-50",
-    orange: "border-amber-200 bg-amber-50",
-    green: "border-green-200 bg-green-50",
-    primary: "border-primary/30 bg-primary/5",
+    blue: "border-blue-200 bg-blue-50 dark:border-blue-500/30 dark:bg-blue-500/10",
+    orange: "border-amber-200 bg-amber-50 dark:border-amber-500/30 dark:bg-amber-500/10",
+    green: "border-green-200 bg-green-50 dark:border-green-500/30 dark:bg-green-500/10",
+    primary: "border-primary/30 bg-primary/5 dark:bg-primary/10",
   };
   return (
     <div className={`rounded-xl border p-4 ${colorMap[color]}`}>
