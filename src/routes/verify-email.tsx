@@ -87,7 +87,10 @@ function VerifyEmailPage() {
   return (
     <AuthLayout
       badge="Email Verify"
-      tagline="完成邮箱验证，开启代理商赚佣金之旅。"
+      taglineMain="分享创造价值"
+      taglineSub="连接创作者与未来"
+      subtitle="邀请好友加入 MovieFlow Studio"
+      subtitleHint="注册即可获得收益"
       formTitle="验证您的邮箱"
       formTag="Verify"
       switchText="想用其他邮箱？"
