@@ -3,7 +3,6 @@ import { ThemeToggle } from "./ThemeToggle";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
-  badge: string;
   taglineMain: string;
   taglineSub: string;
   subtitle: string;
@@ -17,7 +16,6 @@ interface AuthLayoutProps {
 
 export function AuthLayout({
   children,
-  badge,
   taglineMain,
   taglineSub,
   subtitle,
@@ -36,58 +34,55 @@ export function AuthLayout({
           className="relative hidden w-[45%] flex-col justify-between overflow-hidden p-10 md:flex"
           style={{
             background:
-              "linear-gradient(160deg, oklch(0.38 0.06 40) 0%, oklch(0.16 0.025 30) 100%)",
+              "linear-gradient(165deg, oklch(0.23 0.03 280) 0%, oklch(0.12 0.018 280) 100%)",
           }}
         >
-          {/* Decorative warm glow */}
+          {/* Decorative warm glow — softened */}
           <div
             className="pointer-events-none absolute inset-0"
             style={{
               background:
-                "radial-gradient(ellipse at 70% 85%, oklch(0.55 0.13 50 / 0.35), transparent 65%)",
+                "radial-gradient(ellipse at 75% 90%, oklch(0.55 0.11 50 / 0.22), transparent 65%)",
             }}
           />
-          {/* Soft gold orb */}
+          {/* Soft gold orb — softened */}
           <div
-            className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-40"
+            className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-30"
             style={{
               background:
-                "radial-gradient(circle, oklch(0.75 0.12 75 / 0.4), transparent 70%)",
+                "radial-gradient(circle, oklch(0.75 0.12 75 / 0.3), transparent 70%)",
             }}
           />
 
-          {/* Top — badge */}
+          {/* Top — brand anchor */}
           <div className="relative z-10">
-            <span className="inline-block rounded-md border border-white/20 px-3 py-1.5 text-xs font-medium tracking-widest text-white/80 uppercase">
-              {badge}
-            </span>
+            <p className="text-[11px] font-medium tracking-[0.3em] text-white/45 uppercase">
+              MovieFlow Studio
+            </p>
           </div>
 
-          {/* Middle — main tagline */}
+          {/* Middle — main tagline (focal point) */}
           <div className="relative z-10 flex flex-col gap-3">
-            <h1 className="text-4xl leading-tight font-bold tracking-tight text-white lg:text-5xl">
+            <h1 className="text-5xl leading-[1.05] font-bold tracking-tight text-white lg:text-6xl">
               {taglineMain}
             </h1>
-            <p className="text-2xl leading-snug font-light text-white/70 lg:text-3xl">
+            <p className="text-lg leading-snug font-light text-white/55 lg:text-xl">
               {taglineSub}
             </p>
             <div
-              className="mt-4 h-px w-10"
+              className="mt-5 h-px w-12"
               style={{ background: "oklch(0.78 0.13 75 / 0.7)" }}
             />
           </div>
 
           {/* Bottom — subtitle */}
           <div className="relative z-10 flex flex-col gap-1.5">
-            <p className="text-sm font-medium text-white/85">{subtitle}</p>
+            <p className="text-sm text-white/80">{subtitle}</p>
             <p
-              className="text-xs font-medium tracking-wide"
+              className="text-xs font-medium tracking-wider"
               style={{ color: "oklch(0.82 0.13 75)" }}
             >
               {subtitleHint}
-            </p>
-            <p className="mt-6 text-[11px] tracking-[0.3em] text-white/40 uppercase">
-              MovieFlow Studio
             </p>
           </div>
         </div>
