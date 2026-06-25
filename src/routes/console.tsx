@@ -466,7 +466,7 @@ function OverviewSection({
         <h2 className="text-2xl font-bold">你好，{user.name} 👋</h2>
         <p className="mt-1 text-sm text-muted-foreground">最高 50% 返佣，邀请越多赚得越多</p>
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700 dark:bg-green-500/15 dark:text-green-300">
             <span className="h-1.5 w-1.5 rounded-full bg-green-500" />账号正常
           </span>
           <span className="text-xs text-muted-foreground break-all">ID: {user.agentId}</span>
