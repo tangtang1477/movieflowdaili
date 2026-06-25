@@ -521,9 +521,9 @@ function OverviewSection({
         <div className="rounded-xl border border-border bg-card p-5">
           <h3 className="mb-4 text-sm font-semibold text-foreground">邀请码状态</h3>
           <div className="grid grid-cols-3 gap-2">
-            <PendingItem label="待使用" count={pendingCounts.active} color="text-blue-600" onClick={() => onSectionChange("invite")} />
-            <PendingItem label="已过期" count={pendingCounts.expired} color="text-amber-600" onClick={() => onSectionChange("invite")} />
-            <PendingItem label="已用完" count={pendingCounts.fullyUsed} color="text-green-600" onClick={() => onSectionChange("invite")} />
+            <PendingItem label="待使用" count={pendingCounts.active} color="text-blue-600 dark:text-blue-400" onClick={() => onSectionChange("invite")} />
+            <PendingItem label="已过期" count={pendingCounts.expired} color="text-amber-600 dark:text-amber-400" onClick={() => onSectionChange("invite")} />
+            <PendingItem label="已用完" count={pendingCounts.fullyUsed} color="text-green-600 dark:text-green-400" onClick={() => onSectionChange("invite")} />
           </div>
         </div>
 
