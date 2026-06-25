@@ -900,9 +900,9 @@ function StatCard({ label, value, suffix, icon, color }: {
 
 function StatusBadge({ status }: { status: InviteCode["status"] }) {
   const map = {
-    active: { label: "使用中", cls: "bg-green-100 text-green-700" },
-    expired: { label: "已过期", cls: "bg-gray-100 text-gray-600" },
-    used: { label: "已用完", cls: "bg-blue-100 text-blue-700" },
+    active: { label: "使用中", cls: "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-300" },
+    expired: { label: "已过期", cls: "bg-muted text-muted-foreground" },
+    used: { label: "已用完", cls: "bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300" },
   };
   const s = map[status];
   return <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${s.cls}`}>{s.label}</span>;
