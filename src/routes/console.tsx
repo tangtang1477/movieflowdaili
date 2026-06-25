@@ -750,7 +750,7 @@ function StatsSection({
             <div key={r.date} className="rounded-lg border border-border bg-muted/20 p-3">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-semibold">{r.date}</p>
-                <span className={`text-xs font-medium ${r.status.includes("已结算") ? "text-green-600" : "text-amber-600"}`}>
+                <span className={`text-xs font-medium ${r.status.includes("已结算") ? "text-green-600 dark:text-green-400" : "text-amber-600 dark:text-amber-400"}`}>
                   {r.status}
                 </span>
               </div>
