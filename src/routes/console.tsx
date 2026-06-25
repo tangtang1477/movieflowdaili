@@ -332,7 +332,7 @@ function ConsolePage() {
                 <button
                   type="button"
                   onClick={() => setPayMethod("alipay")}
-                  className="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-md border border-[#1677FF]/40 bg-white text-sm font-medium text-[#1677FF] transition-colors hover:bg-[#1677FF]/10 active:bg-[#1677FF]/15"
+                  className="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-md border border-[#1677FF]/40 bg-card text-sm font-medium text-[#1677FF] transition-colors hover:bg-[#1677FF]/10 active:bg-[#1677FF]/15"
                   aria-label="支付宝支付预存积分"
                 >
                   <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden>
