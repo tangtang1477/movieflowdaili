@@ -61,11 +61,14 @@ function VerifyEmailPage() {
     setStatus("verifying");
     setErrorMsg("");
     setTimeout(() => {
-      if (code === "123456") {
+      if (/^\d{6}$/.test(code)) {
+        if (typeof window !== "undefined") {
+          sessionStorage.setItem("agent_session_active", "1");
+        }
         navigate({ to: "/console" });
       } else {
         setStatus("error");
-        setErrorMsg("验证码错误，请重新输入（演示验证码：123456）");
+        setErrorMsg("验证码格式错误，请输入 6 位数字");
         setDigits(["", "", "", "", "", ""]);
         inputRefs.current[0]?.focus();
       }
@@ -103,7 +106,7 @@ function VerifyEmailPage() {
             我们已向 <span className="font-semibold text-foreground break-all">{email || "您的邮箱"}</span> 发送了 6 位验证码，请查收邮件并填写下方验证码。
           </p>
           <p className="mt-2 text-xs text-muted-foreground">
-            提示：演示环境请输入 <span className="font-mono font-semibold text-foreground">123456</span>
+            请在邮件中查收 6 位数字验证码。
           </p>
         </div>
 

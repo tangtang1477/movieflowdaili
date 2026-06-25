@@ -48,6 +48,9 @@ function LoginPage() {
     e.preventDefault();
     if (tab === "email" && !isEmailValid) return;
     if (tab === "phone" && !isPhoneValid) return;
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("agent_session_active", "1");
+    }
     navigate({ to: "/console" });
   };
 
