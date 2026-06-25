@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from "react";
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "代理商登录 — Agent Portal" },
+      { title: "分享开启收益计划 — Agent Portal" },
       { name: "description", content: "分享创造价值" },
     ],
   }),
@@ -58,7 +58,7 @@ function LoginPage() {
       taglineSub="连接创作者与未来"
       subtitle="邀请好友加入 MovieFlow Studio"
       subtitleHint="注册即可获得收益"
-      formTitle="代理商登录"
+      formTitle="分享开启收益计划"
       formTag="Login"
       switchText="没有账号？"
       switchLinkText="去注册"
