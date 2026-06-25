@@ -56,7 +56,7 @@ function LoginPage() {
 
   return (
     <AuthLayout
-      badge="Agent Portal"
+      
       taglineMain="分享创造价值"
       taglineSub="连接创作者与未来"
       subtitle="邀请好友加入 MovieFlow Studio"
