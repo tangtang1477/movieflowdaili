@@ -396,9 +396,9 @@ function ConsolePage() {
         <DialogContent className="max-w-md rounded-2xl border-border bg-card p-7">
           <DialogHeader><DialogTitle className="text-xl font-bold">申请提现</DialogTitle></DialogHeader>
           <div className="mt-2 space-y-3 text-sm leading-relaxed">
-            <div className="rounded-lg border border-green-200 bg-green-50 p-4">
-              <p className="text-xs text-green-700">当前可提现金额</p>
-              <p className="mt-1 text-3xl font-bold text-green-700">¥ {commissionStats.available.toFixed(2)}</p>
+            <div className="rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-500/30 dark:bg-green-500/10">
+              <p className="text-xs text-green-700 dark:text-green-300">当前可提现金额</p>
+              <p className="mt-1 text-3xl font-bold text-green-700 dark:text-green-300">¥ {commissionStats.available.toFixed(2)}</p>
             </div>
             <p className="text-muted-foreground">
               提现需联系我们的合作经理审核，确认无误后预计 <strong className="text-foreground">1–3 个工作日</strong>到账。
