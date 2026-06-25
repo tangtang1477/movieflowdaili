@@ -3,11 +3,10 @@ import { ThemeToggle } from "./ThemeToggle";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
-  /** Legacy props — content now lives inside the hero background image. Kept optional for caller compatibility. */
-  taglineMain?: string;
-  taglineSub?: string;
-  subtitle?: string;
-  subtitleHint?: string;
+  taglineMain: string;
+  taglineSub: string;
+  subtitle: string;
+  subtitleHint: string;
   formTitle: string;
   formTag: string;
   switchText: string;
@@ -17,6 +16,10 @@ interface AuthLayoutProps {
 
 export function AuthLayout({
   children,
+  taglineMain,
+  taglineSub,
+  subtitle,
+  subtitleHint,
   formTitle,
   formTag,
   switchText,
@@ -26,17 +29,63 @@ export function AuthLayout({
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-8">
       <div className="flex w-full max-w-[960px] overflow-hidden rounded-2xl shadow-2xl">
-        {/* Left panel — full-bleed hero illustration (theme-aware via CSS variable) */}
+        {/* Left panel */}
         <div
-          className="relative hidden w-[45%] overflow-hidden md:block"
-          style={{
-            backgroundImage: "var(--auth-panel-image)",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-          }}
-          aria-hidden
-        />
+          className="relative hidden w-[45%] flex-col justify-between overflow-hidden p-10 md:flex"
+          style={{ background: "var(--auth-panel-gradient)" }}
+        >
+          {/* Decorative glow */}
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{ background: "var(--auth-panel-glow)" }}
+          />
+
+          {/* Top — brand anchor */}
+          <div className="relative z-10">
+            <p
+              className="text-[11px] font-medium tracking-[0.3em] uppercase"
+              style={{ color: "var(--auth-panel-brand)" }}
+            >
+              MovieFlow Studio
+            </p>
+          </div>
+
+          {/* Middle — unified content block */}
+          <div className="relative z-10 flex flex-col gap-10">
+            <div className="flex flex-col gap-2">
+              <h1
+                className="text-[34px] leading-[1.25] font-bold tracking-tight"
+                style={{ color: "var(--auth-panel-text)" }}
+              >
+                {taglineMain}
+              </h1>
+              <h2
+                className="text-[34px] leading-[1.25] font-bold tracking-tight"
+                style={{ color: "var(--auth-panel-text)" }}
+              >
+                {taglineSub}
+              </h2>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <p
+                className="text-[14px] leading-relaxed"
+                style={{ color: "var(--auth-panel-text-muted)" }}
+              >
+                {subtitle}
+              </p>
+              <p
+                className="text-[14px] leading-relaxed"
+                style={{ color: "var(--auth-panel-text-muted)" }}
+              >
+                {subtitleHint}
+              </p>
+            </div>
+          </div>
+
+          {/* Bottom spacer */}
+          <div className="relative z-10" />
+        </div>
 
         {/* Right panel - form */}
         <div className="flex w-full flex-col bg-card p-8 md:w-[55%] md:p-10">

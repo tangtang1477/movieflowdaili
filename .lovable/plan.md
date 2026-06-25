@@ -1,70 +1,40 @@
-# 方案：登录页背景图 + 控制台暗色适配
+## 1. 主题切换按钮：真实 glowing 光晕
 
-## 一、登录页（AuthLayout）左侧面板改成背景图
+当前用了两层均匀阴影，看起来像描边而不是光。改造：
 
-把图1（紫色傍晚像素风）作为**暗色模式**左侧背景，图2（黄昏村庄像素风）作为**亮色模式**左侧背景。原本的渐变与文字标题不再需要——图片本身已包含 "Movieflow Studio / 分享创造价值 / 连接创作者与未来 / 邀请好友加入..." 全部宣传文案。
+- 去掉硬边 box-shadow，改用一层 `::before` 伪元素（或外层包裹 div）作为光晕层
+- 光晕用 `radial-gradient(circle, rgba(229,234,146,0.55) 0%, rgba(229,234,146,0.25) 35%, rgba(229,234,146,0) 70%)`
+- 光晕尺寸约 60×60px（按钮 36×36 的 1.7 倍），用 `filter: blur(8px)` 让边缘真正软化
+- 按钮本体保留 #E5EA92 实色，无边框，光晕从中心向外自然衰减
 
-### 资源接入
-- 把两张图通过 `lovable-assets` 上传为 CDN 资源，生成 `src/assets/auth-bg-dark.png.asset.json` 与 `src/assets/auth-bg-light.png.asset.json`。
-- 不把图片拷进 git。
+由于按钮在 AuthLayout 顶部右侧，光晕会向外溢出 — 通过定位让光晕居中于按钮、`pointer-events-none`，不影响点击。
 
-### AuthLayout 改造（`src/components/AuthLayout.tsx`）
-- 左侧 `<div>` 改为：根据当前主题切换 `background-image`，`background-size: cover; background-position: center;`。
-- 由于图片已含完整文案，**移除**左侧所有文字层（brand 小标、taglineMain、taglineSub、subtitle、subtitleHint）和装饰 glow 层；保留容器结构、圆角与阴影。
-- `AuthLayoutProps` 中 `taglineMain / taglineSub / subtitle / subtitleHint` 不再使用——保留 props 签名兼容（标记为可选）即可，无需改 login/register/forgot-password 三个调用点。
-- 主题判断：用 `document.documentElement.classList.contains('dark')` + `useEffect` 监听，或直接用 CSS 变量方案：在 `:root` / `.dark` 下分别定义 `--auth-panel-image: url(...)`，组件里 `background-image: var(--auth-panel-image)` 自动切换（更优，无 JS）。
+## 2. 亮色模式左侧面板重新设计
 
-### styles.css
-- 删除（或保留为空）`--auth-panel-gradient / glow / text / text-muted / brand` 这几个不再使用的变量；新增 `--auth-panel-image` 在 `:root` 与 `.dark` 下分别指向亮/暗背景图 URL。
+当前 AuthLayout 左侧用了硬编码的 `linear-gradient(165deg, oklch(0.22 0.028 285) → oklch(0.14 0.022 285))` — 暗色紫黑色，亮色模式下与白色右卡片冲突。
 
----
+**方案：** 用 CSS 变量驱动，亮/暗色模式各一套渐变。
 
-## 二、控制台（`/console`）整体暗色适配
+新增 token（`src/styles.css`）：
 
-控制台目前主体已经用语义 token（`bg-card`、`text-foreground` 等），但仍有少量硬编码颜色需要替换，并需要全面 review 一遍配色对比度。
+- `.dark` 下 `--auth-panel-gradient` 保持当前深紫黑
+- `:root`（亮色）下 `--auth-panel-gradient` 改为柔和的浅紫/奶白渐变：
+  - `linear-gradient(165deg, oklch(0.96 0.025 285) 0%, oklch(0.88 0.05 290) 100%)`
+  - 即左上偏白、右下偏淡薰衣草紫
+- `--auth-panel-glow`（装饰辉光）：
+  - 暗色：`radial-gradient(ellipse at 80% 90%, oklch(0.55 0.18 290 / 0.22), transparent 60%)`（保持）
+  - 亮色：`radial-gradient(ellipse at 80% 90%, oklch(0.70 0.18 290 / 0.22), transparent 65%)`（淡紫辉光，更柔）
+- `--auth-panel-text` / `--auth-panel-text-muted` / `--auth-panel-brand`：
+  - 暗色：`#fff`、`rgba(255,255,255,0.7)`、`rgba(255,255,255,0.45)`
+  - 亮色：`oklch(0.25 0.04 285)`（深紫灰主标）、`oklch(0.40 0.03 285)`（次要灰紫）、`oklch(0.45 0.05 285)`（品牌字）
 
-### 已识别的硬编码点（`src/routes/console.tsx`）
-1. **行 324**：微信支付按钮 `bg-white` → 改为 `bg-card` 或保留浅底但加 `dark:bg-card`。
-2. **行 335**：支付宝按钮 `bg-white` → 同上。
-3. **行 366**：二维码容器 `bg-white` → 二维码本身需要白底才能扫，保留 `bg-white` 但加内边距 + `dark:bg-white`（显式声明，避免误判）。SVG 内部的 `#fff/#111` 是二维码图形，保留不动。
-4. **行 904**：`expired` 状态 chip `bg-gray-100 text-gray-600` → 改为 `bg-muted text-muted-foreground`。
+**AuthLayout.tsx 改造：**
+- 把硬编码的 `style={{ background: ... }}` 改为 `style={{ background: "var(--auth-panel-gradient)" }}`
+- 辉光层同样改成 `var(--auth-panel-glow)`
+- 文字颜色从 `text-white` / `text-white/70` / `text-white/45` 改为 `style={{ color: "var(--auth-panel-text)" }}` 等，确保亮色模式下文字为深紫灰而非白色（在浅背景上保证可读）
 
-### Recharts 图表暗色适配
-图表硬编码了浅色坐标轴/网格。需要：
-- `CartesianGrid stroke` 改用 `var(--border)`（通过 `hsl(var(--border))` 或直接读 CSS 变量）。
-- `XAxis / YAxis` 的 `tick` 字色改为 `var(--muted-foreground)`。
-- `Tooltip` 的 `contentStyle` 设为 `background: var(--popover); color: var(--popover-foreground); border: 1px solid var(--border)`。
-- `PIE_COLORS` 暂保留（这些是图表数据色，亮暗通用 OK）。
+## 涉及文件
 
-### Dialog / 表格 / 侧边栏
-- 通读 console.tsx 其余部分，把所有 `bg-white`、`bg-gray-*`、`text-gray-*`、`border-gray-*`、`text-black`、`#fff` 等都替换为对应 token：
-  - 背景：`bg-card` / `bg-background` / `bg-muted`
-  - 文本：`text-foreground` / `text-muted-foreground`
-  - 边框：`border-border`
-  - 主色：`text-primary` / `bg-primary`
-- 验收标准：切到暗色模式后，控制台所有面板、对话框、表格、按钮、图表都能清晰可读，无白底大色块、无低对比文字。
-
-### 主题入口
-控制台目前没有 `ThemeToggle`（只在登录页有）。在控制台顶栏右上角加一个 `<ThemeToggle />`，方便登录后切换。
-
----
-
-## 文件改动清单
-
-```text
-新增：
-  src/assets/auth-bg-dark.png.asset.json     （lovable-assets 指针）
-  src/assets/auth-bg-light.png.asset.json    （lovable-assets 指针）
-
-修改：
-  src/styles.css                  → 新增 --auth-panel-image，清理旧的 auth-panel-* 变量
-  src/components/AuthLayout.tsx   → 左侧改为背景图，移除文字层
-  src/routes/console.tsx          → 替换硬编码色、Recharts 暗色适配、加 ThemeToggle
-```
-
-## 不改动
-- 亮色模式整体配色继续沿用现有版本，仅左侧面板换成图2。
-- 登录/注册/忘记密码三个路由的调用方式不变。
-- ThemeToggle 组件本身不动。
-
-确认后我进入 build 模式执行。
+- `src/components/ThemeToggle.tsx`：重做光晕（伪元素 + blur + 径向渐变）
+- `src/styles.css`：新增 4 个 auth panel token，亮/暗两套
+- `src/components/AuthLayout.tsx`：左侧背景/辉光/文字颜色改为 token 驱动
