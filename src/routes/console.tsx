@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, redirect } from "@tanstack/react-router";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { useState, useEffect, useMemo } from "react";
 import {
@@ -13,6 +13,14 @@ import {
 } from "recharts";
 
 export const Route = createFileRoute("/console")({
+  beforeLoad: () => {
+    if (typeof window !== "undefined") {
+      const authed = sessionStorage.getItem("agent_session_active") === "1";
+      if (!authed) {
+        throw redirect({ to: "/login" });
+      }
+    }
+  },
   head: () => ({
     meta: [
       { title: "代理商控制台 — Agent Console" },
@@ -37,8 +45,10 @@ type Section = "overview" | "invite" | "stats" | "info";
 /* ── Helpers ── */
 function generateRandomCode(prefix: string) {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  const bytes = new Uint32Array(5);
+  crypto.getRandomValues(bytes);
   let result = prefix;
-  for (let i = 0; i < 5; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
+  for (let i = 0; i < 5; i++) result += chars.charAt(bytes[i] % chars.length);
   return result;
 }
 
@@ -79,10 +89,10 @@ function ConsolePage() {
   const [genUsageLimit, setGenUsageLimit] = useState(1);
   const [genCredits, setGenCredits] = useState(0);
 
-  const user = { name: "Vic", email: "fangxi.dou@gmail.com", agentId: "agt_a5877cdbe3584f7a87109359", status: "ACTIVE" };
+  const user = { name: "Demo User", email: "demo@example.com", agentId: "agt_demo_placeholder", status: "ACTIVE" };
   const agent = {
-    company: "Victoria Ltc", invitePrefix: "AAAA", contact: "Vic",
-    phone: "13216341111", contactEmail: "fangxi.dou@gmail.com",
+    company: "Demo Company", invitePrefix: "DEMO", contact: "Demo User",
+    phone: "未设置", contactEmail: "未设置",
     settlementDay: "未设置", commissionRate: "未设置",
   };
   const commissionNotSet = agent.commissionRate === "未设置";
