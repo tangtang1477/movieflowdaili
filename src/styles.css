@@ -132,17 +132,8 @@
   --sand: oklch(0.26 0.028 285);
   --dark-brown: oklch(0.16 0.022 285);
 
-  /* Auth panel (dark) — blue → purple → warm peach diagonal gradient */
-  --auth-panel-gradient:
-    radial-gradient(ellipse at 95% 100%, oklch(0.72 0.08 55 / 0.55), transparent 55%),
-    radial-gradient(ellipse at 10% 5%, oklch(0.50 0.18 270 / 0.75), transparent 60%),
-    linear-gradient(135deg, oklch(0.45 0.16 268) 0%, oklch(0.42 0.10 305) 50%, oklch(0.62 0.08 50) 100%);
-  --auth-panel-glow:
-    radial-gradient(circle at 85% 90%, oklch(0.78 0.09 60 / 0.20), transparent 50%),
-    radial-gradient(ellipse at 15% 15%, oklch(0.55 0.20 270 / 0.22), transparent 55%);
-  --auth-panel-text: oklch(1 0 0);
-  --auth-panel-text-muted: oklch(1 0 0 / 0.7);
-  --auth-panel-brand: oklch(1 0 0 / 0.45);
+  /* Auth panel — left-side hero background image (dark) */
+  --auth-panel-image: url("/__l5e/assets-v1/78f6496f-f879-4992-bbc3-7c874d92899a/auth-bg-dark.png");
 }
 
 @layer base {
