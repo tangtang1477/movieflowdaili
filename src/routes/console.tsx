@@ -772,9 +772,9 @@ function StatsSection({
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={trendData} barSize={20}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} />
-                <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12 }} />
+                <XAxis dataKey="month" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} stroke="var(--border)" />
+                <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} stroke="var(--border)" />
+                <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12, background: "var(--popover)", border: "1px solid var(--border)", color: "var(--popover-foreground)" }} labelStyle={{ color: "var(--popover-foreground)" }} />
                 <Bar dataKey="佣金收益" fill="#10b981" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="充值人数" fill="#3b82f6" radius={[4, 4, 0, 0]} />
               </BarChart>
