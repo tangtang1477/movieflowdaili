@@ -734,7 +734,7 @@ function StatsSection({
                   <td className="py-3 pr-4">{r.rate}</td>
                   <td className="py-3 pr-4 font-semibold text-foreground">¥ {r.commission.toFixed(2)}</td>
                   <td className="py-3">
-                    <span className={`inline-flex items-center gap-1 text-xs font-medium ${r.status.includes("已结算") ? "text-green-600" : "text-amber-600"}`}>
+                    <span className={`inline-flex items-center gap-1 text-xs font-medium ${r.status.includes("已结算") ? "text-green-600 dark:text-green-400" : "text-amber-600 dark:text-amber-400"}`}>
                       <span className={`h-1.5 w-1.5 rounded-full ${r.status.includes("已结算") ? "bg-green-500" : "bg-amber-500"}`} />
                       {r.status}
                     </span>
