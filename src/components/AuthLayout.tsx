@@ -34,15 +34,15 @@ export function AuthLayout({
           className="relative hidden w-[45%] flex-col justify-between overflow-hidden p-10 md:flex"
           style={{
             background:
-              "linear-gradient(165deg, oklch(0.18 0.022 280) 0%, oklch(0.10 0.015 280) 100%)",
+              "linear-gradient(165deg, oklch(0.22 0.028 285) 0%, oklch(0.14 0.022 285) 100%)",
           }}
         >
-          {/* Decorative warm glow — softened */}
+          {/* Decorative purple glow */}
           <div
             className="pointer-events-none absolute inset-0"
             style={{
               background:
-                "radial-gradient(ellipse at 75% 95%, oklch(0.55 0.11 50 / 0.18), transparent 60%)",
+                "radial-gradient(ellipse at 80% 90%, oklch(0.55 0.18 290 / 0.22), transparent 60%)",
             }}
           />
 
@@ -54,24 +54,21 @@ export function AuthLayout({
           </div>
 
           {/* Middle — unified content block */}
-          <div className="relative z-10 flex flex-col gap-8">
-            <div className="flex flex-col gap-4">
-              <h1 className="text-[40px] leading-[1.15] font-bold tracking-tight text-white lg:text-[46px]">
+          <div className="relative z-10 flex flex-col gap-10">
+            <div className="flex flex-col gap-2">
+              <h1 className="text-[34px] leading-[1.25] font-bold tracking-tight text-white">
                 {taglineMain}
               </h1>
-              <p className="text-[19px] leading-snug font-light text-white/65 lg:text-[21px]">
+              <h2 className="text-[34px] leading-[1.25] font-bold tracking-tight text-white">
                 {taglineSub}
-              </p>
+              </h2>
             </div>
 
             <div className="flex flex-col gap-2">
               <p className="text-[14px] leading-relaxed text-white/70">
                 {subtitle}
               </p>
-              <p
-                className="text-[14px] font-medium tracking-wide"
-                style={{ color: "oklch(0.82 0.13 75)" }}
-              >
+              <p className="text-[14px] leading-relaxed text-white/70">
                 {subtitleHint}
               </p>
             </div>
