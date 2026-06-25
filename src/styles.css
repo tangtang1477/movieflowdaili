@@ -136,9 +136,15 @@
   --sand: oklch(0.26 0.028 285);
   --dark-brown: oklch(0.16 0.022 285);
 
-  /* Auth panel (dark) */
-  --auth-panel-gradient: linear-gradient(165deg, oklch(0.22 0.028 285) 0%, oklch(0.14 0.022 285) 100%);
-  --auth-panel-glow: radial-gradient(ellipse at 80% 90%, oklch(0.55 0.18 290 / 0.22), transparent 60%);
+  /* Auth panel (dark) — vivid multi-stop gradient to clearly separate from right card */
+  --auth-panel-gradient:
+    radial-gradient(ellipse at 15% 20%, oklch(0.50 0.22 295 / 0.55), transparent 55%),
+    radial-gradient(ellipse at 90% 15%, oklch(0.55 0.20 220 / 0.45), transparent 50%),
+    radial-gradient(ellipse at 75% 100%, oklch(0.55 0.24 340 / 0.50), transparent 60%),
+    linear-gradient(155deg, oklch(0.22 0.08 285) 0%, oklch(0.13 0.05 270) 55%, oklch(0.08 0.04 260) 100%);
+  --auth-panel-glow:
+    radial-gradient(circle at 30% 75%, oklch(0.72 0.20 300 / 0.20), transparent 45%),
+    radial-gradient(ellipse at 85% 40%, oklch(0.68 0.20 250 / 0.16), transparent 55%);
   --auth-panel-text: oklch(1 0 0);
   --auth-panel-text-muted: oklch(1 0 0 / 0.7);
   --auth-panel-brand: oklch(1 0 0 / 0.45);
