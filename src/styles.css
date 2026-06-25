@@ -135,6 +135,13 @@
   --terracotta-foreground: oklch(0.98 0.003 285);
   --sand: oklch(0.26 0.028 285);
   --dark-brown: oklch(0.16 0.022 285);
+
+  /* Auth panel (dark) */
+  --auth-panel-gradient: linear-gradient(165deg, oklch(0.22 0.028 285) 0%, oklch(0.14 0.022 285) 100%);
+  --auth-panel-glow: radial-gradient(ellipse at 80% 90%, oklch(0.55 0.18 290 / 0.22), transparent 60%);
+  --auth-panel-text: oklch(1 0 0);
+  --auth-panel-text-muted: oklch(1 0 0 / 0.7);
+  --auth-panel-brand: oklch(1 0 0 / 0.45);
 }
 
 @layer base {
