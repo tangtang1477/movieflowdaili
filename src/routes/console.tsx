@@ -790,8 +790,8 @@ function StatsSection({
                 <Pie data={distributionData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" label={((props: any) => `${props.name ?? ""} ${((props.percent ?? 0) * 100).toFixed(0)}%`) as any}>
                   {distributionData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
                 </Pie>
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12 }} />
+                <Legend wrapperStyle={{ fontSize: 12, color: "var(--muted-foreground)" }} />
+                <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12, background: "var(--popover)", border: "1px solid var(--border)", color: "var(--popover-foreground)" }} labelStyle={{ color: "var(--popover-foreground)" }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
