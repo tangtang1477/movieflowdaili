@@ -865,7 +865,7 @@ function InfoRow({ label, value, badge, contactWhen, onContact }: {
     <div className="flex items-center justify-between gap-3 border-b border-border/50 py-2.5 text-sm last:border-0">
       <span className="text-muted-foreground shrink-0">{label}</span>
       {badge ? (
-        <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700">{value}</span>
+        <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700 dark:bg-green-500/15 dark:text-green-300">{value}</span>
       ) : showContact ? (
         <button onClick={onContact} className="btn-contact">联系我们</button>
       ) : (
