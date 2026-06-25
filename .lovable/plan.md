@@ -1,58 +1,74 @@
-## 改动计划
+## 目标
+1. 全站背景与卡片色重新对齐到 #0F0F1A（深紫黑）色系
+2. 删除登录页左侧的 "Agent Portal" 徽章
+3. 重新设计左侧文案的字号与排版层级
 
-### 1. 主题切换功能（默认暗色）
+## 1. 色系调整（src/styles.css）
 
-**新建 `src/components/ThemeToggle.tsx`**
-- 圆形小按钮，使用 lucide-react 的 `Sun` / `Moon` icon
-- 暗色模式显示 `Sun`（点击切到亮色），亮色模式显示 `Moon`（点击切到暗色）
-- 通过给 `<html>` 元素加/移除 `.dark` class 切换主题
-- 持久化到 `localStorage`（key: `theme`），默认值 `dark`
-- 首次挂载时读取 localStorage 并应用
+将暗色模式（`.dark`）的色值改为冷调深紫黑系，以 #0F0F1A 为基准：
 
-**在 `src/routes/__root.tsx`** 中加入初始化脚本：
-- 在 `<head>` 注入一段同步 inline script，在页面渲染前根据 localStorage（默认 dark）给 `<html>` 加 `.dark` class，避免闪烁
+- `--background`: oklch(0.16 0.018 280) ≈ #0F0F1A
+- `--card`: oklch(0.21 0.022 280) — 卡片比背景略亮一档，保证层次
+- `--popover`: 同 card
+- `--secondary` / `--muted` / `--accent`: oklch(0.26 0.025 280)
+- `--border`: oklch(1 0 0 / 8%)
+- `--input`: oklch(1 0 0 / 12%)
+- `--sidebar`: oklch(0.18 0.022 280)
+- `--dark-brown`（左侧卡片基色）: oklch(0.18 0.025 280)
+- 保留 terracotta/primary 作为暖橘色强调色，与冷背景形成对比
 
-**集成位置**
-- `AuthLayout` 右上角（form panel 右上）放一个 `ThemeToggle`
-- `console.tsx` 顶部导航栏右侧也放一个
+亮色模式保留现有暖砂色不动（用户只提到暗色卡片适配）。
 
-### 2. 重新设计登录卡片左侧
+## 2. AuthLayout 左侧重设计（src/components/AuthLayout.tsx）
 
-修改 `src/components/AuthLayout.tsx` 左侧 panel，并扩展 props 以支持主副标题分行：
+**删除：**
+- 顶部的 `Agent Portal` 徽章块（整个 `<span>`）
+- 组件 `badge` prop 及其在调用方的传值
 
-**Props 调整**
-- 把 `tagline: string` 拆为：
-  - `taglineMain: string`（主标题第一行）
-  - `taglineSub: string`（主标题第二行，较小/低对比）
-  - `subtitle: string`（副标题第一行）
-  - `subtitleHint: string`（副标题第二行）
+**新背景：** 改用与 #0F0F1A 协调的深紫黑渐变 + 内敛的暖色辉光
 
-**视觉设计（保留 terracotta 暖色基调）**
-- 背景沿用深棕渐变，新增右下角的柔光晕
-- 顶部 Badge `Agent Portal` 维持原样
-- 主标题区：
-  - `分享创造价值` —— 大号 4xl/5xl 加粗白色
-  - `连接创作者与未来` —— 3xl 半透明白 (text-white/70)，紧贴下方
-- 中部分割线（细横线，宽 40px，warm gold）
-- 副标题区（位于卡片中下部）：
-  - `邀请好友加入 MovieFlow Studio` —— sm 字号 text-white/80
-  - `注册即可获得收益` —— xs，warm gold 色（oklch 暖金）作为高亮点缀
-- 左下角加一个微妙的装饰（小圆点矩阵或品牌字标 `MovieFlow`）
-
-**`login.tsx`** 更新 AuthLayout 调用：
-```tsx
-taglineMain="分享创造价值"
-taglineSub="连接创作者与未来"
-subtitle="邀请好友加入 MovieFlow Studio"
-subtitleHint="注册即可获得收益"
+```
+linear-gradient(165deg, oklch(0.23 0.03 280) 0%, oklch(0.12 0.018 280) 100%)
 ```
 
-`register.tsx` 同步更新（保留品牌一致性，文案可微调成注册场景）。
+辉光保留橘色 radial-gradient，但降低饱和度让其更克制。
 
-### 涉及文件
-- 新建 `src/components/ThemeToggle.tsx`
-- 修改 `src/routes/__root.tsx`（注入初始主题脚本）
-- 修改 `src/components/AuthLayout.tsx`（props + 左侧重设计 + 右上角放 ThemeToggle）
-- 修改 `src/routes/login.tsx`（新 props）
-- 修改 `src/routes/register.tsx`（新 props）
-- 修改 `src/routes/console.tsx`（顶栏加 ThemeToggle）
+**新排版层级（解决"不协调"）：**
+
+```text
+┌─────────────────────────────┐
+│  MOVIEFLOW STUDIO   ← 顶部细标 0.7rem tracking宽
+│                              │
+│                              │
+│  分享创造价值        ← 主标 text-5xl/6xl bold leading-[1.05]
+│  连接创作者与未来    ← 副标 text-lg/xl 浅色 font-light
+│                              │
+│  ──── (金色 12px 横线)       │
+│                              │
+│  邀请好友加入       ← subtitle text-sm 白80
+│  MovieFlow Studio            │
+│  注册即可获得收益   ← 金色 text-xs tracking宽
+└─────────────────────────────┘
+```
+
+具体字号：
+- 主标 `taglineMain`: `text-5xl lg:text-6xl font-bold tracking-tight leading-[1.05]`（之前 4xl/5xl）
+- 副标 `taglineSub`: `text-lg lg:text-xl font-light text-white/55`（之前 2xl/3xl 与主标差距太小、显得堆叠）
+- 金色分隔线：`h-px w-12`
+- `subtitle`: `text-sm text-white/80`
+- `subtitleHint`: `text-xs tracking-wider` 金色
+
+视觉重心由"三段平均分布"调整为"上品牌锚点 → 中部主视觉聚焦 → 底部辅助信息"，让主标题成为唯一焦点。
+
+## 3. 同步更新调用方
+
+`AuthLayout` 移除 `badge` prop。修改 4 个调用文件，删除 `badge="..."` 行：
+- `src/routes/login.tsx`
+- `src/routes/register.tsx`
+- `src/routes/forgot-password.tsx`
+- `src/routes/verify-email.tsx`
+
+## 涉及文件
+- `src/styles.css`（暗色 token 重映射）
+- `src/components/AuthLayout.tsx`（删徽章 + 左侧重排版 + 背景渐变）
+- `src/routes/login.tsx` / `register.tsx` / `forgot-password.tsx` / `verify-email.tsx`（移除 badge prop）
