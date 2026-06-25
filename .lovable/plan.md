@@ -1,74 +1,40 @@
-## 目标
-1. 全站背景与卡片色重新对齐到 #0F0F1A（深紫黑）色系
-2. 删除登录页左侧的 "Agent Portal" 徽章
-3. 重新设计左侧文案的字号与排版层级
+## 1. 主题切换按钮：真实 glowing 光晕
 
-## 1. 色系调整（src/styles.css）
+当前用了两层均匀阴影，看起来像描边而不是光。改造：
 
-将暗色模式（`.dark`）的色值改为冷调深紫黑系，以 #0F0F1A 为基准：
+- 去掉硬边 box-shadow，改用一层 `::before` 伪元素（或外层包裹 div）作为光晕层
+- 光晕用 `radial-gradient(circle, rgba(229,234,146,0.55) 0%, rgba(229,234,146,0.25) 35%, rgba(229,234,146,0) 70%)`
+- 光晕尺寸约 60×60px（按钮 36×36 的 1.7 倍），用 `filter: blur(8px)` 让边缘真正软化
+- 按钮本体保留 #E5EA92 实色，无边框，光晕从中心向外自然衰减
 
-- `--background`: oklch(0.16 0.018 280) ≈ #0F0F1A
-- `--card`: oklch(0.21 0.022 280) — 卡片比背景略亮一档，保证层次
-- `--popover`: 同 card
-- `--secondary` / `--muted` / `--accent`: oklch(0.26 0.025 280)
-- `--border`: oklch(1 0 0 / 8%)
-- `--input`: oklch(1 0 0 / 12%)
-- `--sidebar`: oklch(0.18 0.022 280)
-- `--dark-brown`（左侧卡片基色）: oklch(0.18 0.025 280)
-- 保留 terracotta/primary 作为暖橘色强调色，与冷背景形成对比
+由于按钮在 AuthLayout 顶部右侧，光晕会向外溢出 — 通过定位让光晕居中于按钮、`pointer-events-none`，不影响点击。
 
-亮色模式保留现有暖砂色不动（用户只提到暗色卡片适配）。
+## 2. 亮色模式左侧面板重新设计
 
-## 2. AuthLayout 左侧重设计（src/components/AuthLayout.tsx）
+当前 AuthLayout 左侧用了硬编码的 `linear-gradient(165deg, oklch(0.22 0.028 285) → oklch(0.14 0.022 285))` — 暗色紫黑色，亮色模式下与白色右卡片冲突。
 
-**删除：**
-- 顶部的 `Agent Portal` 徽章块（整个 `<span>`）
-- 组件 `badge` prop 及其在调用方的传值
+**方案：** 用 CSS 变量驱动，亮/暗色模式各一套渐变。
 
-**新背景：** 改用与 #0F0F1A 协调的深紫黑渐变 + 内敛的暖色辉光
+新增 token（`src/styles.css`）：
 
-```
-linear-gradient(165deg, oklch(0.23 0.03 280) 0%, oklch(0.12 0.018 280) 100%)
-```
+- `.dark` 下 `--auth-panel-gradient` 保持当前深紫黑
+- `:root`（亮色）下 `--auth-panel-gradient` 改为柔和的浅紫/奶白渐变：
+  - `linear-gradient(165deg, oklch(0.96 0.025 285) 0%, oklch(0.88 0.05 290) 100%)`
+  - 即左上偏白、右下偏淡薰衣草紫
+- `--auth-panel-glow`（装饰辉光）：
+  - 暗色：`radial-gradient(ellipse at 80% 90%, oklch(0.55 0.18 290 / 0.22), transparent 60%)`（保持）
+  - 亮色：`radial-gradient(ellipse at 80% 90%, oklch(0.70 0.18 290 / 0.22), transparent 65%)`（淡紫辉光，更柔）
+- `--auth-panel-text` / `--auth-panel-text-muted` / `--auth-panel-brand`：
+  - 暗色：`#fff`、`rgba(255,255,255,0.7)`、`rgba(255,255,255,0.45)`
+  - 亮色：`oklch(0.25 0.04 285)`（深紫灰主标）、`oklch(0.40 0.03 285)`（次要灰紫）、`oklch(0.45 0.05 285)`（品牌字）
 
-辉光保留橘色 radial-gradient，但降低饱和度让其更克制。
-
-**新排版层级（解决"不协调"）：**
-
-```text
-┌─────────────────────────────┐
-│  MOVIEFLOW STUDIO   ← 顶部细标 0.7rem tracking宽
-│                              │
-│                              │
-│  分享创造价值        ← 主标 text-5xl/6xl bold leading-[1.05]
-│  连接创作者与未来    ← 副标 text-lg/xl 浅色 font-light
-│                              │
-│  ──── (金色 12px 横线)       │
-│                              │
-│  邀请好友加入       ← subtitle text-sm 白80
-│  MovieFlow Studio            │
-│  注册即可获得收益   ← 金色 text-xs tracking宽
-└─────────────────────────────┘
-```
-
-具体字号：
-- 主标 `taglineMain`: `text-5xl lg:text-6xl font-bold tracking-tight leading-[1.05]`（之前 4xl/5xl）
-- 副标 `taglineSub`: `text-lg lg:text-xl font-light text-white/55`（之前 2xl/3xl 与主标差距太小、显得堆叠）
-- 金色分隔线：`h-px w-12`
-- `subtitle`: `text-sm text-white/80`
-- `subtitleHint`: `text-xs tracking-wider` 金色
-
-视觉重心由"三段平均分布"调整为"上品牌锚点 → 中部主视觉聚焦 → 底部辅助信息"，让主标题成为唯一焦点。
-
-## 3. 同步更新调用方
-
-`AuthLayout` 移除 `badge` prop。修改 4 个调用文件，删除 `badge="..."` 行：
-- `src/routes/login.tsx`
-- `src/routes/register.tsx`
-- `src/routes/forgot-password.tsx`
-- `src/routes/verify-email.tsx`
+**AuthLayout.tsx 改造：**
+- 把硬编码的 `style={{ background: ... }}` 改为 `style={{ background: "var(--auth-panel-gradient)" }}`
+- 辉光层同样改成 `var(--auth-panel-glow)`
+- 文字颜色从 `text-white` / `text-white/70` / `text-white/45` 改为 `style={{ color: "var(--auth-panel-text)" }}` 等，确保亮色模式下文字为深紫灰而非白色（在浅背景上保证可读）
 
 ## 涉及文件
-- `src/styles.css`（暗色 token 重映射）
-- `src/components/AuthLayout.tsx`（删徽章 + 左侧重排版 + 背景渐变）
-- `src/routes/login.tsx` / `register.tsx` / `forgot-password.tsx` / `verify-email.tsx`（移除 badge prop）
+
+- `src/components/ThemeToggle.tsx`：重做光晕（伪元素 + blur + 径向渐变）
+- `src/styles.css`：新增 4 个 auth panel token，亮/暗两套
+- `src/components/AuthLayout.tsx`：左侧背景/辉光/文字颜色改为 token 驱动
