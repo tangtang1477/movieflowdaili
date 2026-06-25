@@ -61,30 +61,37 @@ export function AuthLayout({
             </p>
           </div>
 
-          {/* Middle — main tagline (focal point) */}
-          <div className="relative z-10 flex flex-col gap-3">
-            <h1 className="text-5xl leading-[1.05] font-bold tracking-tight text-white lg:text-6xl">
-              {taglineMain}
-            </h1>
-            <p className="text-lg leading-snug font-light text-white/55 lg:text-xl">
-              {taglineSub}
-            </p>
+          {/* Middle — unified content block */}
+          <div className="relative z-10 flex flex-col gap-7">
+            <div className="flex flex-col gap-2.5">
+              <h1 className="text-[38px] leading-[1.15] font-bold tracking-tight text-white lg:text-[44px]">
+                {taglineMain}
+              </h1>
+              <p className="text-[15px] font-light tracking-wide text-white/50 lg:text-base">
+                {taglineSub}
+              </p>
+            </div>
+
             <div
-              className="mt-5 h-px w-12"
-              style={{ background: "oklch(0.78 0.13 75 / 0.7)" }}
+              className="h-px w-10"
+              style={{ background: "oklch(0.78 0.13 75 / 0.55)" }}
             />
+
+            <div className="flex flex-col gap-1.5">
+              <p className="text-[13px] leading-relaxed text-white/65">
+                {subtitle}
+              </p>
+              <p
+                className="text-[13px] font-medium tracking-wide"
+                style={{ color: "oklch(0.82 0.13 75)" }}
+              >
+                {subtitleHint}
+              </p>
+            </div>
           </div>
 
-          {/* Bottom — subtitle */}
-          <div className="relative z-10 flex flex-col gap-1.5">
-            <p className="text-sm text-white/80">{subtitle}</p>
-            <p
-              className="text-xs font-medium tracking-wider"
-              style={{ color: "oklch(0.82 0.13 75)" }}
-            >
-              {subtitleHint}
-            </p>
-          </div>
+          {/* Bottom spacer */}
+          <div className="relative z-10" />
         </div>
 
         {/* Right panel - form */}
